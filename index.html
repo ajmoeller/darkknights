@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Knights — 2026 BIHL Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121c;
+    --card-home: #161625;
+    --card-away: #1a1318;
+    --accent: #c8aa5a;
+    --accent-dim: #9a7e3a;
+    --home-tag: #2a6a3a;
+    --away-tag: #7a2a2a;
+    --text: #e8e4dc;
+    --text-dim: #8a8680;
+    --border: #2a2a36;
+    --venue-boondall: #3a5a7a;
+    --venue-acacia: #5a6a3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* --- HEADER --- */
+  .header {
+    text-align: center;
+    padding: 48px 24px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse 600px 300px at 50% 0%, rgba(200,170,90,0.08), transparent),
+      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(200,170,90,0.015) 80px, rgba(200,170,90,0.015) 81px);
+    pointer-events: none;
+  }
+
+  .header h1 {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.4rem, 6vw, 3.8rem);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(200,170,90,0.15);
+    position: relative;
+  }
+
+  .header .subtitle {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: clamp(0.85rem, 2vw, 1.05rem);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* --- DIVIDER --- */
+  .divider {
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+    margin: 0 auto;
+  }
+
+  /* --- SCHEDULE --- */
+  .schedule {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  .month-group {
+    margin-bottom: 36px;
+  }
+
+  .month-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    margin-bottom: 14px;
+    padding-left: 4px;
+  }
+
+  .game-card {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 0 18px;
+    align-items: center;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, transform 0.15s;
+    position: relative;
+  }
+
+  .game-card:hover {
+    border-color: var(--accent-dim);
+    transform: translateX(3px);
+  }
+
+  .game-card.home { background: var(--card-home); }
+  .game-card.away { background: var(--card-away); }
+
+  .game-date {
+    text-align: center;
+  }
+
+  .game-date .day-num {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .game-date .day-name {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .game-info {
+    min-width: 0;
+  }
+
+  .game-opponent {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .game-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    line-height: 1.6;
+  }
+
+  .tag-home { background: var(--home-tag); color: #a8e8b8; }
+  .tag-away { background: var(--away-tag); color: #e8a8a8; }
+
+  .game-venue {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+
+  .game-venue .venue-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  .venue-boondall .venue-dot { background: var(--venue-boondall); }
+  .venue-acacia .venue-dot { background: var(--venue-acacia); }
+
+  .game-time {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .game-time .time-start {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+
+  .game-time .time-end {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 1px;
+  }
+
+  /* --- PAST GAME STYLING --- */
+  .game-card.past {
+    opacity: 0.45;
+  }
+  .game-card.past:hover {
+    opacity: 0.7;
+  }
+
+  /* --- NEXT GAME HIGHLIGHT --- */
+  .game-card.next-game {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(200,170,90,0.08);
+  }
+  .game-card.next-game::after {
+    content: 'NEXT';
+    position: absolute;
+    right: -1px;
+    top: -1px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    padding: 3px 10px;
+    border-radius: 0 8px 0 6px;
+  }
+
+  /* --- FOOTER --- */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* --- RESPONSIVE --- */
+  @media (max-width: 520px) {
+    .game-card {
+      grid-template-columns: 50px 1fr auto;
+      gap: 0 12px;
+      padding: 14px 14px;
+    }
+    .game-opponent { font-size: 1rem; }
+    .stats-bar { gap: 20px; }
+  }
+
+  /* --- ANIMATION --- */
+  .game-card {
+    animation: fadeSlide 0.4s ease both;
+  }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Dark Knights</h1>
+  <div class="subtitle">BIHL 2026 Season Schedule — Div 2 Buccanneers</div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">18</div><div class="stat-label">Games</div></div>
+    <div class="stat"><div class="stat-num">9</div><div class="stat-label">Home</div></div>
+    <div class="stat"><div class="stat-num">9</div><div class="stat-label">Away</div></div>
+    <div class="stat"><div class="stat-num">Mar–Aug</div><div class="stat-label">Season</div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="schedule" id="schedule"></div>
+
+<div class="footer">BIHL 2026 — Dark Knights Div 2 Buccanneers — Draft Schedule V3</div>
+
+<script>
+const games = [
+  { date: "2026-03-15", dayName: "Sun", dayNum: "15", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-03-22", dayName: "Sun", dayNum: "22", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-03-29", dayName: "Sun", dayNum: "29", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-04-19", dayName: "Sun", dayNum: "19", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Dragons", venue: "Acacia IceWorld", vclass: "venue-acacia" },
+  { date: "2026-04-26", dayName: "Sun", dayNum: "26", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Puckers", venue: "Acacia IceWorld", vclass: "venue-acacia" },
+  { date: "2026-05-03", dayName: "Sun", dayNum: "3", month: "May", start: "8:30 PM", end: "9:30 PM", ha: "home", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-05-10", dayName: "Sun", dayNum: "10", month: "May", start: "6:00 PM", end: "7:00 PM", ha: "home", opp: "Puckers", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-05-17", dayName: "Sun", dayNum: "17", month: "May", start: "9:30 PM", end: "10:30 PM", ha: "home", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-05-24", dayName: "Sun", dayNum: "24", month: "May", start: "9:30 PM", end: "10:30 PM", ha: "away", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-06-07", dayName: "Sun", dayNum: "7", month: "June", start: "7:00 PM", end: "8:00 PM", ha: "home", opp: "Dragons", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-06-14", dayName: "Sun", dayNum: "14", month: "June", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Drop Bears", venue: "Acacia IceWorld", vclass: "venue-acacia" },
+  { date: "2026-06-21", dayName: "Sun", dayNum: "21", month: "June", start: "8:15 PM", end: "9:15 PM", ha: "away", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-07-05", dayName: "Sun", dayNum: "5", month: "July", start: "6:00 PM", end: "7:00 PM", ha: "away", opp: "Dragons", venue: "Acacia IceWorld", vclass: "venue-acacia" },
+  { date: "2026-07-12", dayName: "Sun", dayNum: "12", month: "July", start: "6:00 PM", end: "7:00 PM", ha: "away", opp: "Puckers", venue: "Acacia IceWorld", vclass: "venue-acacia" },
+  { date: "2026-07-19", dayName: "Sun", dayNum: "19", month: "July", start: "8:15 PM", end: "9:15 PM", ha: "home", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-07-26", dayName: "Sun", dayNum: "26", month: "July", start: "6:00 PM", end: "7:00 PM", ha: "home", opp: "Drop Bears", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-08-02", dayName: "Sun", dayNum: "2", month: "August", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Drop Bears", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  { date: "2026-08-09", dayName: "Sun", dayNum: "9", month: "August", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+];
+
+const today = new Date();
+today.setHours(0,0,0,0);
+
+let nextGameIdx = -1;
+for (let i = 0; i < games.length; i++) {
+  const gd = new Date(games[i].date + 'T00:00:00');
+  if (gd >= today) { nextGameIdx = i; break; }
+}
+
+const schedule = document.getElementById('schedule');
+let currentMonth = '';
+
+games.forEach((g, i) => {
+  if (g.month !== currentMonth) {
+    currentMonth = g.month;
+    const label = document.createElement('div');
+    label.className = 'month-label';
+    label.textContent = currentMonth;
+    if (i > 0) label.style.marginTop = '12px';
+    schedule.appendChild(label);
+  }
+
+  const gd = new Date(g.date + 'T00:00:00');
+  const isPast = gd < today;
+  const isNext = i === nextGameIdx;
+
+  const card = document.createElement('div');
+  card.className = `game-card ${g.ha}${isPast ? ' past' : ''}${isNext ? ' next-game' : ''}`;
+  card.style.animationDelay = `${i * 0.04}s`;
+
+  card.innerHTML = `
+    <div class="game-date">
+      <div class="day-num">${g.dayNum}</div>
+      <div class="day-name">${g.dayName}</div>
+    </div>
+    <div class="game-info">
+      <div class="game-opponent">vs ${g.opp}</div>
+      <div class="game-meta">
+        <span class="tag ${g.ha === 'home' ? 'tag-home' : 'tag-away'}">${g.ha}</span>
+        <span class="game-venue ${g.vclass}"><span class="venue-dot"></span>${g.venue}</span>
+      </div>
+    </div>
+    <div class="game-time">
+      <div class="time-start">${g.start}</div>
+      <div class="time-end">– ${g.end}</div>
+    </div>
+  `;
+
+  schedule.appendChild(card);
+});
+</script>
+</body>
+</html>
