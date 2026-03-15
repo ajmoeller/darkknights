@@ -117,6 +117,45 @@
     margin: 0 auto;
   }
 
+  /* --- VENUE STATS --- */
+  .venue-stats {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .venue-stat {
+    display: flex;
+    align-items: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .venue-stat .venue-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  .venue-stat .venue-dot.boondall { background: var(--venue-boondall); }
+  .venue-stat .venue-dot.acacia { background: var(--venue-acacia); }
+
+  .venue-stat-num {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    color: var(--text);
+    margin-right: 4px;
+    font-size: 0.8rem;
+  }
+
   /* --- SCHEDULE --- */
   .schedule {
     max-width: 740px;
@@ -349,8 +388,12 @@
   <div class="stats-bar">
     <div class="stat"><div class="stat-num" id="stat-record">0-0-0</div><div class="stat-label">Record</div></div>
     <div class="stat"><div class="stat-num" id="stat-remaining">18</div><div class="stat-label">Games Remaining</div></div>
-    <div class="stat"><div class="stat-num">9</div><div class="stat-label">Home</div></div>
-    <div class="stat"><div class="stat-num">9</div><div class="stat-label">Away</div></div>
+    <div class="stat"><div class="stat-num" id="stat-home">9</div><div class="stat-label">Home</div></div>
+    <div class="stat"><div class="stat-num" id="stat-away">9</div><div class="stat-label">Away</div></div>
+  </div>
+  <div class="venue-stats">
+    <div class="venue-stat"><span class="venue-dot boondall"></span><span class="venue-stat-num" id="stat-boondall">0</span> Boondall</div>
+    <div class="venue-stat"><span class="venue-dot acacia"></span><span class="venue-stat-num" id="stat-acacia">0</span> Acacia</div>
   </div>
 </div>
 
@@ -387,6 +430,8 @@ today.setHours(0,0,0,0);
 
 let wins = 0, losses = 0, ties = 0;
 let gamesRemaining = 0;
+let homeRemaining = 0, awayRemaining = 0;
+let boondallRemaining = 0, acaciaRemaining = 0;
 
 let nextGameIdx = -1;
 for (let i = 0; i < games.length; i++) {
@@ -397,6 +442,11 @@ for (let i = 0; i < games.length; i++) {
     else ties++;
   } else {
     gamesRemaining++;
+    if (games[i].ha === 'home') homeRemaining++;
+    else awayRemaining++;
+    
+    if (games[i].vclass === 'venue-boondall') boondallRemaining++;
+    else if (games[i].vclass === 'venue-acacia') acaciaRemaining++;
   }
 
   const gd = new Date(games[i].date + 'T00:00:00');
@@ -407,6 +457,10 @@ for (let i = 0; i < games.length; i++) {
 
 document.getElementById('stat-record').textContent = `${wins}-${losses}-${ties}`;
 document.getElementById('stat-remaining').textContent = gamesRemaining;
+document.getElementById('stat-home').textContent = homeRemaining;
+document.getElementById('stat-away').textContent = awayRemaining;
+document.getElementById('stat-boondall').textContent = boondallRemaining;
+document.getElementById('stat-acacia').textContent = acaciaRemaining;
 
 const schedule = document.getElementById('schedule');
 let currentMonth = '';
