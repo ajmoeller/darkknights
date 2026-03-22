@@ -330,6 +330,22 @@
     letter-spacing: 0.05em;
   }
 
+  .game-photos-link {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-decoration: none;
+    text-transform: uppercase;
+    margin-top: 2px;
+    opacity: 0.8;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .game-photos-link:hover {
+    opacity: 1;
+    color: #fff;
+  }
+
   /* --- NEXT GAME HIGHLIGHT --- */
   .game-card.next-game {
     border-color: var(--accent);
@@ -405,7 +421,7 @@
 
 <script>
 const games = [
-  { date: "2026-03-15", dayName: "Sun", dayNum: "15", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 9, opp: 0 } },
+  { date: "2026-03-15", dayName: "Sun", dayNum: "15", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 9, opp: 0 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122239988414045173" },
   { date: "2026-03-22", dayName: "Sun", dayNum: "22", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 6, opp: 2 } },
   { date: "2026-03-29", dayName: "Sun", dayNum: "29", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall" },
   { date: "2026-04-19", dayName: "Sun", dayNum: "19", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Dragons", venue: "Acacia IceWorld", vclass: "venue-acacia" },
@@ -497,10 +513,13 @@ games.forEach((g, i) => {
     let resultText = isWin ? 'WIN' : (isLoss ? 'LOSS' : 'TIE');
     let resultClass = isWin ? 'result-win' : (isLoss ? 'result-loss' : 'result-tie');
     
+    let photosHtml = g.photos ? `<a href="${g.photos}" target="_blank" class="game-photos-link">Photos ↗</a>` : '';
+    
     timeOrScoreHtml = `
       <div class="game-score">
         <div class="score-result ${resultClass}">${resultText}</div>
         <div class="score-numbers">${g.score.dk} - ${g.score.opp}</div>
+        ${photosHtml}
       </div>
     `;
   }
