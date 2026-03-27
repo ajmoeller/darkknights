@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://darkknights.com.au/sitemap.xml
