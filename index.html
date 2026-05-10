@@ -758,12 +758,12 @@ function displayPlayerName(name) {
 }
 
 function assistPhrase(assists) {
-  if (!assists || assists.length === 0) return 'Unassisted';
+  if (!assists || assists.length === 0) return null;
   return assists.map(displayPlayerName).join(', ');
 }
 
 function assistPhraseWithTotals(assists, totals) {
-  if (!assists || assists.length === 0) return 'Unassisted';
+  if (!assists || assists.length === 0) return null;
   return assists.map(a => `${displayPlayerName(a)} <span class="running-total">(${totals[a]})</span>`).join(', ');
 }
 
@@ -791,10 +791,11 @@ function buildGoalsPanel(g) {
       const badges = (goal.badges && goal.badges.length)
         ? `<span class="badges">${goal.badges.map((b) => `[${b}]`).join(' ')}</span>`
         : '';
+      const assistStr = assistPhraseWithTotals(goal.assists, goal._assistTotals);
       html += `<div class="goal-line">
         <div class="goal-meta">${goal.time}${badges}</div>
         <div class="goal-scorer">${displayPlayerName(goal.scorer)} <span class="running-total">(${goal._goalTotal})</span></div>
-        <div class="goal-assist">Assists: ${assistPhraseWithTotals(goal.assists, goal._assistTotals)}</div>
+        <div class="goal-assist">${assistStr !== null ? `Assists: ${assistStr}` : 'Unassisted'}</div>
       </div>`;
     }
   }
