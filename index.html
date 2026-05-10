@@ -911,6 +911,7 @@ games.forEach((g, i) => {
       <div class="game-opponent">vs ${g.opp}</div>
       <div class="game-meta">
         <span class="tag ${g.ha === 'home' ? 'tag-home' : 'tag-away'}">${g.ha}</span>
+        ${isNext ? `<img src="assets/${g.ha === 'home' ? 'darkjersey' : 'whitejersey'}.png" style="width:20px;height:20px;vertical-align:middle;margin-left:6px;border-radius:3px;" alt="${g.ha} jersey logo">` : ''}
         <span class="game-venue ${g.vclass}"><span class="venue-dot"></span>${g.venue}</span>
       </div>
     </div>
