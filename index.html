@@ -738,7 +738,7 @@ function buildGoalsPanel(g) {
     panel.innerHTML = '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
     return panel;
   }
-  let html = '<h4>Goals</h4>';
+  let html = '';
   
   const periods = {};
   for (const goal of g.dkGoals) {
