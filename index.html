@@ -226,12 +226,15 @@
     border-radius: 8px;
     margin-bottom: 6px;
     border: 1px solid var(--border);
-    transition: border-color 0.2s, transform 0.15s;
+    transition: border-color 0.2s;
     position: relative;
   }
 
   .game-card:hover {
     border-color: var(--accent-dim);
+  }
+
+  .game-wrap:hover {
     transform: translateX(3px);
   }
 
@@ -341,6 +344,7 @@
   .game-wrap {
     margin-bottom: 6px;
     animation: fadeSlide 0.4s ease both;
+    transition: transform 0.15s;
   }
 
   .game-wrap .game-card {
