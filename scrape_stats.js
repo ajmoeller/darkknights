@@ -11,6 +11,13 @@ const TEAM_NAME = "Buccaneers Dark Knights";
 const TEAM_ID = "672741";
 const SCHEDULE_URL = "https://www.esportsdesk.com/leagues/schedules.cfm?clientid=6241&leagueID=28544&schedType=main&printPage=0";
 const BOXSCORE_BASE = "https://www.esportsdesk.com/leagues/hockey_boxscores.cfm?clientID=6241&leagueID=28544&gameID=";
+const PLAYER_ALIASES = {
+  "Caleb Perry": "White Chocolate"
+};
+
+function displayPlayerName(name) {
+  return PLAYER_ALIASES[name] || name;
+}
 
 async function fetchHtml(url) {
   const res = await fetch(url, {
@@ -74,7 +81,7 @@ function parseBoxScore(html, gameId) {
       
       if (!scorerMatch) continue;
       const teamId = scorerMatch[1];
-      const scorerName = scorerMatch[2];
+      const scorerName = displayPlayerName(scorerMatch[2]);
       
       if (teamId !== TEAM_ID) continue; // Not our team's goal
       
@@ -85,7 +92,7 @@ function parseBoxScore(html, gameId) {
       const assists = [];
       // skip the first one (scorer)
       for (let j = 1; j < allPlayerLinks.length; j++) {
-        assists.push(allPlayerLinks[j][1]);
+        assists.push(displayPlayerName(allPlayerLinks[j][1]));
       }
       
       // Time and Badges are in the next td

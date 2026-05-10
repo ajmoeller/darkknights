@@ -368,23 +368,25 @@
 
   .game-toggle-hint {
     grid-column: 1 / -1;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--accent-dim);
-    margin-top: 12px;
-    padding-top: 10px;
+    margin-top: 8px;
+    padding-top: 6px;
     border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    line-height: 1.1;
   }
 
   .game-toggle-hint .chevron {
-    font-size: 0.55rem;
+    font-size: 0.48rem;
     color: var(--accent);
     transition: transform 0.2s ease;
+    opacity: 0.9;
   }
 
   .game-wrap.expanded .game-toggle-hint .chevron {
@@ -407,11 +409,23 @@
   .game-goals-panel h4 {
     font-family: 'Oswald', sans-serif;
     font-weight: 600;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--accent-dim);
-    margin: 14px 0 10px;
+    color: var(--accent);
+    margin: 12px 0 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 0 16px rgba(200, 170, 90, 0.18);
+  }
+
+  .game-goals-panel h4::before {
+    content: '';
+    width: 10px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent-dim), var(--accent));
   }
 
   .period-header {
@@ -702,10 +716,17 @@ document.getElementById('stat-acacia').textContent = acaciaRemaining;
 
 const schedule = document.getElementById('schedule');
 let currentMonth = '';
+const PLAYER_ALIASES = {
+  "Caleb Perry": "White Chocolate"
+};
+
+function displayPlayerName(name) {
+  return PLAYER_ALIASES[name] || name;
+}
 
 function assistPhrase(assists) {
   if (!assists || assists.length === 0) return 'Unassisted';
-  return assists.join(', ');
+  return assists.map(displayPlayerName).join(', ');
 }
 
 function buildGoalsPanel(g) {
@@ -717,7 +738,7 @@ function buildGoalsPanel(g) {
     panel.innerHTML = '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
     return panel;
   }
-  let html = '<h4>Dark Knights goals</h4>';
+  let html = '<h4>Goals</h4>';
   
   const periods = {};
   for (const goal of g.dkGoals) {
@@ -734,7 +755,7 @@ function buildGoalsPanel(g) {
         : '';
       html += `<div class="goal-line">
         <div class="goal-meta">${goal.time}${badges}</div>
-        <div class="goal-scorer">${goal.scorer}</div>
+        <div class="goal-scorer">${displayPlayerName(goal.scorer)}</div>
         <div class="goal-assist">Assists: ${assistPhrase(goal.assists)}</div>
       </div>`;
     }
@@ -791,7 +812,7 @@ games.forEach((g, i) => {
   }
 
   const toggleHint = g.score
-    ? `<div class="game-toggle-hint"><span>Dark Knights goals</span><span class="chevron" aria-hidden="true">▼</span></div>`
+    ? `<div class="game-toggle-hint"><span>Goals</span><span class="chevron" aria-hidden="true">▼</span></div>`
     : '';
 
   if (toggleHint) {
@@ -799,7 +820,7 @@ games.forEach((g, i) => {
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
     card.setAttribute('aria-expanded', 'false');
-    card.setAttribute('aria-label', `Show Dark Knights goals: ${g.month} ${g.dayNum} vs ${g.opp}`);
+    card.setAttribute('aria-label', `Show goals: ${g.month} ${g.dayNum} vs ${g.opp}`);
     const panel = buildGoalsPanel(g);
     card.setAttribute('aria-controls', panel.id);
 
