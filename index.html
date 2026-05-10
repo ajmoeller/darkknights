@@ -489,6 +489,14 @@
     padding: 4px 0 8px;
   }
 
+  .running-total {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-dim);
+    opacity: 0.85;
+  }
+
   @media (max-width: 520px) {
     .game-goals-panel {
       padding: 0 14px 8px 14px;
@@ -719,6 +727,22 @@ document.getElementById('stat-away').textContent = awayRemaining;
 document.getElementById('stat-boondall').textContent = boondallRemaining;
 document.getElementById('stat-acacia').textContent = acaciaRemaining;
 
+// Pre-compute running goal/assist season totals (games are already in chronological order)
+const _goalRunning = {};
+const _assistRunning = {};
+games.forEach(g => {
+  if (!g.dkGoals) return;
+  g.dkGoals.forEach(goal => {
+    _goalRunning[goal.scorer] = (_goalRunning[goal.scorer] || 0) + 1;
+    goal._goalTotal = _goalRunning[goal.scorer];
+    goal._assistTotals = {};
+    (goal.assists || []).forEach(a => {
+      _assistRunning[a] = (_assistRunning[a] || 0) + 1;
+      goal._assistTotals[a] = _assistRunning[a];
+    });
+  });
+});
+
 const schedule = document.getElementById('schedule');
 let currentMonth = '';
 const PLAYER_ALIASES = {
@@ -732,6 +756,11 @@ function displayPlayerName(name) {
 function assistPhrase(assists) {
   if (!assists || assists.length === 0) return 'Unassisted';
   return assists.map(displayPlayerName).join(', ');
+}
+
+function assistPhraseWithTotals(assists, totals) {
+  if (!assists || assists.length === 0) return 'Unassisted';
+  return assists.map(a => `${displayPlayerName(a)} <span class="running-total">(${totals[a]})</span>`).join(', ');
 }
 
 function buildGoalsPanel(g) {
@@ -760,8 +789,8 @@ function buildGoalsPanel(g) {
         : '';
       html += `<div class="goal-line">
         <div class="goal-meta">${goal.time}${badges}</div>
-        <div class="goal-scorer">${displayPlayerName(goal.scorer)}</div>
-        <div class="goal-assist">Assists: ${assistPhrase(goal.assists)}</div>
+        <div class="goal-scorer">${displayPlayerName(goal.scorer)} <span class="running-total">(${goal._goalTotal})</span></div>
+        <div class="goal-assist">Assists: ${assistPhraseWithTotals(goal.assists, goal._assistTotals)}</div>
       </div>`;
     }
   }
