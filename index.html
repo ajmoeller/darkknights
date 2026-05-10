@@ -337,6 +337,145 @@
     opacity: 0.7;
   }
 
+  /* --- EXPANDABLE GOAL DETAILS --- */
+  .game-wrap {
+    margin-bottom: 6px;
+    animation: fadeSlide 0.4s ease both;
+  }
+
+  .game-wrap .game-card {
+    margin-bottom: 0;
+  }
+
+  .game-wrap.expanded .game-card {
+    border-radius: 8px 8px 0 0;
+    border-bottom: none;
+  }
+
+  .game-wrap.expanded .game-card.past {
+    opacity: 0.95;
+  }
+
+  .game-card.has-goals-toggle {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .game-card.has-goals-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .game-toggle-hint {
+    grid-column: 1 / -1;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .game-toggle-hint .chevron {
+    font-size: 0.55rem;
+    color: var(--accent);
+    transition: transform 0.2s ease;
+  }
+
+  .game-wrap.expanded .game-toggle-hint .chevron {
+    transform: rotate(180deg);
+  }
+
+  .game-goals-panel {
+    display: none;
+    padding: 0 20px 16px 20px;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .game-goals-panel.open {
+    display: block;
+  }
+
+  .game-goals-panel h4 {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    margin: 14px 0 10px;
+  }
+
+  .period-header {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin: 12px 0 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 2px;
+  }
+
+  .goal-line {
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--text);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .goal-line:last-child {
+    border-bottom: none;
+  }
+
+  .goal-meta {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .goal-meta .badges {
+    margin-left: 6px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .goal-scorer {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .goal-assist {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .goal-placeholder {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    padding: 4px 0 8px;
+  }
+
+  @media (max-width: 520px) {
+    .game-goals-panel {
+      padding: 0 14px 14px 14px;
+    }
+  }
+
   /* --- SCORE STYLING --- */
   .game-score {
     text-align: right;
@@ -426,9 +565,6 @@
   }
 
   /* --- ANIMATION --- */
-  .game-card {
-    animation: fadeSlide 0.4s ease both;
-  }
   @keyframes fadeSlide {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
@@ -460,13 +596,60 @@
 
 <script>
 const games = [
-  { date: "2026-03-15", dayName: "Sun", dayNum: "15", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 9, opp: 0 }, photos: "https://www.facebook.com/61551355211283/photos/a.122239988414045173" },
-  { date: "2026-03-22", dayName: "Sun", dayNum: "22", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 6, opp: 2 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122243058026045173" },
-  { date: "2026-03-29", dayName: "Sun", dayNum: "29", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 6, opp: 3 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122243082578045173" },
-  { date: "2026-04-19", dayName: "Sun", dayNum: "19", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Dragons", venue: "Acacia IceWorld", vclass: "venue-acacia", score: { dk: 7, opp: 2 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122244702344045173" },
-  { date: "2026-04-26", dayName: "Sun", dayNum: "26", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Puckers", venue: "Acacia IceWorld", vclass: "venue-acacia", score: { dk: 2, opp: 2 }, photos: "https://www.facebook.com/media/set/?set=a.122244796292045173&type=3" },
-  { date: "2026-05-03", dayName: "Sun", dayNum: "3", month: "May", start: "8:30 PM", end: "9:30 PM", ha: "home", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 8, opp: 4 } },
-  { date: "2026-05-10", dayName: "Sun", dayNum: "10", month: "May", start: "6:00 PM", end: "7:00 PM", ha: "home", opp: "Puckers", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 2, opp: 4 } },
+  { date: "2026-03-15", dayName: "Sun", dayNum: "15", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 9, opp: 0 }, photos: "https://www.facebook.com/61551355211283/photos/a.122239988414045173", dkGoals: [
+    { period: "2nd", time: "14:21", scorer: "Taku Ide", assists: ["Lindsey Utter"] },
+    { period: "2nd", time: "2:09", scorer: "Calen French", assists: [] },
+    { period: "2nd", time: "1:02", scorer: "James Gillitt", assists: ["Xavier Cutting"] },
+    { period: "3rd", time: "15:45", scorer: "Aidan Atkins", assists: [] },
+    { period: "3rd", time: "13:57", scorer: "Caleb Perry", assists: [], badges: ["PPG"] },
+    { period: "3rd", time: "11:51", scorer: "Taku Ide", assists: ["Andrew Litten"] },
+    { period: "3rd", time: "8:19", scorer: "Calen French", assists: ["Aidan Atkins"] },
+    { period: "3rd", time: "6:45", scorer: "Mathew Hartikainen", assists: ["James Gillitt"] },
+    { period: "3rd", time: "0:09", scorer: "Xavier Cutting", assists: ["Mathew Hartikainen"] },
+  ] },
+  { date: "2026-03-22", dayName: "Sun", dayNum: "22", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 6, opp: 2 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122243058026045173", dkGoals: [
+    { period: "1st", time: "4:34", scorer: "Andrew Litten", assists: ["Dayle Leahy", "Aaron Moeller"] },
+    { period: "2nd", time: "15:37", scorer: "Calen French", assists: ["Jonah Hicks", "Aidan Atkins"] },
+    { period: "2nd", time: "13:36", scorer: "Grace Kalambokas", assists: [] },
+    { period: "2nd", time: "4:11", scorer: "Andrew Litten", assists: ["Taku Ide", "Dayle Leahy"] },
+    { period: "3rd", time: "10:03", scorer: "Dayle Leahy", assists: ["Taku Ide"], badges: ["PPG"] },
+    { period: "3rd", time: "9:08", scorer: "Calen French", assists: ["Aidan Atkins"] },
+  ] },
+  { date: "2026-03-29", dayName: "Sun", dayNum: "29", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 6, opp: 3 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122243082578045173", dkGoals: [
+    { period: "1st", time: "6:39", scorer: "Aidan Atkins", assists: ["Dayle Leahy", "Jonah Hicks"] },
+    { period: "1st", time: "2:56", scorer: "Aidan Atkins", assists: ["Jonah Hicks", "Anders Madsen"] },
+    { period: "2nd", time: "8:58", scorer: "Xavier Cutting", assists: ["Grace Kalambokas"] },
+    { period: "2nd", time: "6:12", scorer: "Calen French", assists: ["Jonah Hicks", "Aidan Atkins"] },
+    { period: "2nd", time: "5:38", scorer: "Aidan Atkins", assists: ["Jonah Hicks"] },
+    { period: "3rd", time: "8:06", scorer: "Calen French", assists: ["Caleb Perry"], badges: ["SHG"] },
+  ] },
+  { date: "2026-04-19", dayName: "Sun", dayNum: "19", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Dragons", venue: "Acacia IceWorld", vclass: "venue-acacia", score: { dk: 7, opp: 2 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122244702344045173", dkGoals: [
+    { period: "1st", time: "10:30", scorer: "Caleb Perry", assists: [] },
+    { period: "1st", time: "9:35", scorer: "James Gillitt", assists: [] },
+    { period: "1st", time: "3:44", scorer: "Calen French", assists: ["Caleb Perry"], badges: ["PPG"] },
+    { period: "2nd", time: "16:38", scorer: "Lindsey Utter", assists: ["Dayle Leahy"] },
+    { period: "2nd", time: "9:51", scorer: "Calen French", assists: ["Caleb Perry"] },
+    { period: "3rd", time: "16:23", scorer: "Xavier Cutting", assists: [] },
+    { period: "3rd", time: "4:22", scorer: "Taku Ide", assists: ["Dayle Leahy", "James Gillitt"] },
+  ] },
+  { date: "2026-04-26", dayName: "Sun", dayNum: "26", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Puckers", venue: "Acacia IceWorld", vclass: "venue-acacia", score: { dk: 2, opp: 2 }, photos: "https://www.facebook.com/media/set/?set=a.122244796292045173&type=3", dkGoals: [
+    { period: "1st", time: "2:19", scorer: "Aidan Atkins", assists: ["Aaron Moeller"] },
+    { period: "3rd", time: "6:18", scorer: "Aidan Atkins", assists: ["Jonah Hicks"] },
+  ] },
+  { date: "2026-05-03", dayName: "Sun", dayNum: "3", month: "May", start: "8:30 PM", end: "9:30 PM", ha: "home", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 8, opp: 4 }, dkGoals: [
+    { period: "1st", time: "15:45", scorer: "Aidan Atkins", assists: ["Calen French", "Jonah Hicks"] },
+    { period: "1st", time: "7:20", scorer: "Xavier Cutting", assists: ["Andrew Litten", "Connor MacKenzie"] },
+    { period: "1st", time: "2:12", scorer: "Andrew Litten", assists: ["Calen French", "Xavier Cutting"] },
+    { period: "2nd", time: "16:35", scorer: "Taku Ide", assists: ["James Gillitt"] },
+    { period: "2nd", time: "7:00", scorer: "Taku Ide", assists: ["James Gillitt", "Andrew Litten"] },
+    { period: "2nd", time: "5:30", scorer: "Grace Kalambokas", assists: ["Andrew Litten"] },
+    { period: "3rd", time: "9:26", scorer: "Taku Ide", assists: ["Lindsey Utter"] },
+    { period: "3rd", time: "1:43", scorer: "Grace Kalambokas", assists: ["Jonah Hicks"] },
+  ] },
+  { date: "2026-05-10", dayName: "Sun", dayNum: "10", month: "May", start: "6:00 PM", end: "7:00 PM", ha: "home", opp: "Puckers", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 2, opp: 4 }, dkGoals: [
+    { period: "2nd", time: "13:21", scorer: "Taku Ide", assists: ["Aidan Atkins"] },
+    { period: "3rd", time: "8:51", scorer: "Calen French", assists: ["Grace Kalambokas"] },
+  ] },
   { date: "2026-05-17", dayName: "Sun", dayNum: "17", month: "May", start: "9:30 PM", end: "10:30 PM", ha: "home", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall" },
   { date: "2026-05-24", dayName: "Sun", dayNum: "24", month: "May", start: "9:30 PM", end: "10:30 PM", ha: "away", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall" },
   { date: "2026-06-07", dayName: "Sun", dayNum: "7", month: "June", start: "7:00 PM", end: "8:00 PM", ha: "home", opp: "Dragons", venue: "Boondall IceWorld", vclass: "venue-boondall" },
@@ -520,6 +703,47 @@ document.getElementById('stat-acacia').textContent = acaciaRemaining;
 const schedule = document.getElementById('schedule');
 let currentMonth = '';
 
+function assistPhrase(assists) {
+  if (!assists || assists.length === 0) return 'Unassisted';
+  return assists.join(', ');
+}
+
+function buildGoalsPanel(g) {
+  const panel = document.createElement('div');
+  panel.className = 'game-goals-panel';
+  panel.id = `goals-${g.date}`;
+  panel.setAttribute('role', 'region');
+  if (!g.dkGoals || g.dkGoals.length === 0) {
+    panel.innerHTML = '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
+    return panel;
+  }
+  let html = '<h4>Dark Knights goals</h4>';
+  
+  const periods = {};
+  for (const goal of g.dkGoals) {
+    if (!periods[goal.period]) periods[goal.period] = [];
+    periods[goal.period].push(goal);
+  }
+  
+  for (const period of ["1st", "2nd", "3rd", "OT", "SO"]) {
+    if (!periods[period]) continue;
+    html += `<div class="period-header">${period} Period</div>`;
+    for (const goal of periods[period]) {
+      const badges = (goal.badges && goal.badges.length)
+        ? `<span class="badges">${goal.badges.map((b) => `[${b}]`).join(' ')}</span>`
+        : '';
+      html += `<div class="goal-line">
+        <div class="goal-meta">${goal.time}${badges}</div>
+        <div class="goal-scorer">${goal.scorer}</div>
+        <div class="goal-assist">Assists: ${assistPhrase(goal.assists)}</div>
+      </div>`;
+    }
+  }
+  
+  panel.innerHTML = html;
+  return panel;
+}
+
 games.forEach((g, i) => {
   if (g.month !== currentMonth) {
     currentMonth = g.month;
@@ -534,9 +758,12 @@ games.forEach((g, i) => {
   const isPast = gd < today || g.score;
   const isNext = i === nextGameIdx && !g.score;
 
+  const wrap = document.createElement('div');
+  wrap.className = 'game-wrap';
+  wrap.style.animationDelay = `${i * 0.04}s`;
+
   const card = document.createElement('div');
   card.className = `game-card ${g.ha}${isPast ? ' past' : ''}${isNext ? ' next-game' : ''}`;
-  card.style.animationDelay = `${i * 0.04}s`;
 
   let timeOrScoreHtml = `
     <div class="game-time">
@@ -548,12 +775,12 @@ games.forEach((g, i) => {
   if (g.score) {
     const isWin = g.score.dk > g.score.opp;
     const isLoss = g.score.dk < g.score.opp;
-    
-    let resultText = isWin ? 'WIN' : (isLoss ? 'LOSS' : 'TIE');
-    let resultClass = isWin ? 'result-win' : (isLoss ? 'result-loss' : 'result-tie');
-    
-    let photosHtml = g.photos ? `<a href="${g.photos}" target="_blank" rel="noopener noreferrer" class="game-photos-link">Photos ↗</a>` : '';
-    
+
+    const resultText = isWin ? 'WIN' : (isLoss ? 'LOSS' : 'TIE');
+    const resultClass = isWin ? 'result-win' : (isLoss ? 'result-loss' : 'result-tie');
+
+    const photosHtml = g.photos ? `<a href="${g.photos}" target="_blank" rel="noopener noreferrer" class="game-photos-link">Photos ↗</a>` : '';
+
     timeOrScoreHtml = `
       <div class="game-score">
         <div class="score-result ${resultClass}">${resultText}</div>
@@ -561,6 +788,57 @@ games.forEach((g, i) => {
         ${photosHtml}
       </div>
     `;
+  }
+
+  const toggleHint = g.score
+    ? `<div class="game-toggle-hint"><span>Dark Knights goals</span><span class="chevron" aria-hidden="true">▼</span></div>`
+    : '';
+
+  if (toggleHint) {
+    card.classList.add('has-goals-toggle');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-expanded', 'false');
+    card.setAttribute('aria-label', `Show Dark Knights goals: ${g.month} ${g.dayNum} vs ${g.opp}`);
+    const panel = buildGoalsPanel(g);
+    card.setAttribute('aria-controls', panel.id);
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a[href]')) return;
+      const open = !wrap.classList.contains('expanded');
+      wrap.classList.toggle('expanded', open);
+      panel.classList.toggle('open', open);
+      card.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        if (e.target.closest('a[href]')) return;
+        e.preventDefault();
+        card.click();
+      }
+    });
+
+    card.innerHTML = `
+    <div class="game-date">
+      <div class="day-num">${g.dayNum}</div>
+      <div class="day-name">${g.dayName}</div>
+    </div>
+    <div class="game-info">
+      <div class="game-opponent">vs ${g.opp}</div>
+      <div class="game-meta">
+        <span class="tag ${g.ha === 'home' ? 'tag-home' : 'tag-away'}">${g.ha}</span>
+        <span class="game-venue ${g.vclass}"><span class="venue-dot"></span>${g.venue}</span>
+      </div>
+    </div>
+    ${timeOrScoreHtml}
+    ${toggleHint}
+  `;
+
+    wrap.appendChild(card);
+    wrap.appendChild(panel);
+    schedule.appendChild(wrap);
+    return;
   }
 
   card.innerHTML = `
@@ -578,7 +856,8 @@ games.forEach((g, i) => {
     ${timeOrScoreHtml}
   `;
 
-  schedule.appendChild(card);
+  wrap.appendChild(card);
+  schedule.appendChild(wrap);
 });
 </script>
 </body>
