@@ -16,7 +16,9 @@ const PLAYER_ALIASES = {
 };
 
 function displayPlayerName(name) {
-  return PLAYER_ALIASES[name] || name;
+  if (!name || typeof name !== 'string') return name;
+  const normalized = name.replace(/^Mathew(\s+)/i, 'Mat$1');
+  return PLAYER_ALIASES[normalized] || PLAYER_ALIASES[name] || normalized;
 }
 
 async function fetchHtml(url) {
