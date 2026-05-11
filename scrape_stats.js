@@ -107,9 +107,16 @@ function parseBoxScore(html, gameId) {
         
         let time = "";
         let badges = [];
+        let scoreAtTime = "";
         if (timeMatch) {
           if (timeMatch[1]) badges.push(timeMatch[1]); // e.g. PPG, SHG, EN
           time = timeMatch[2];
+        }
+        
+        // Extract score state at the time of goal, e.g. "Buc 2, Sta 1" or "Sta 1, Buc 0"
+        const scoreMatch = timeCell.match(/([A-Za-z]{2,}\s+\d+)[,\s]+([A-Za-z]{2,}\s+\d+)$/);
+        if (scoreMatch) {
+          scoreAtTime = `${scoreMatch[1]}, ${scoreMatch[2]}`;
         }
         
         goals.push({
@@ -117,7 +124,8 @@ function parseBoxScore(html, gameId) {
           time: time,
           scorer: scorerName,
           assists: assists,
-          badges: badges
+          badges: badges,
+          scoreAtTime: scoreAtTime || undefined
         });
       }
     }
