@@ -846,7 +846,7 @@ function buildGoalsPanel(g) {
       html += `<div class="goal-line">
         <div class="goal-meta">${goal.time}${badges}${scoreHtml}</div>
         <div class="goal-scorer">${displayPlayerName(goal.scorer)} <span class="running-total">(${goal._goalTotal})</span></div>
-        <div class="goal-assist">${assistStr !== null ? `Assists: ${assistStr}` : 'Unassisted'}</div>
+        <div class="goal-assist">${assistStr !== null ? `${goal.assists.length === 1 ? 'Assist:' : 'Assists:'} ${assistStr}` : 'Unassisted'}</div>
       </div>`;
     }
   }
