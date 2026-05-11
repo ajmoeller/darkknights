@@ -77,8 +77,8 @@ function parseBoxScore(html, gameId) {
       if (rowHtml.includes("No Scoring")) continue;
       
       // Look for the scorer's link to see if they are on our team
-      // <a href="...&teamID=672741">Scorer Name</a>
-      const scorerRegex = /#\d+\s+<a href="[^"]+&teamID=(\d+)">([^<]+)<\/a>/;
+      // More tolerant regex to handle extra attributes on <a> tags and varying href order
+      const scorerRegex = /#\d+\s+<a[^>]*teamID=(\d+)[^>]*>([^<]+)<\/a>/i;
       const scorerMatch = scorerRegex.exec(rowHtml);
       
       if (!scorerMatch) continue;
@@ -88,9 +88,8 @@ function parseBoxScore(html, gameId) {
       if (teamId !== TEAM_ID) continue; // Not our team's goal
       
       // Parse assists (all remaining links in that td are assists usually)
-      // Actually, after the scorer, there might be "(1) Assister 1, Assister 2"
-      // We can grab all player links in the cell
-      const allPlayerLinks = [...rowHtml.matchAll(/<a href="[^"]+&teamID=\d+">([^<]+)<\/a>/g)];
+      // Use the same tolerant pattern
+      const allPlayerLinks = [...rowHtml.matchAll(/<a[^>]*teamID=\d+[^>]*>([^<]+)<\/a>/gi)];
       const assists = [];
       // skip the first one (scorer)
       for (let j = 1; j < allPlayerLinks.length; j++) {
