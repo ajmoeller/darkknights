@@ -600,6 +600,20 @@
   }
 
   /* --- NEXT GAME HIGHLIGHT --- */
+  #next-game {
+    scroll-margin-top: 32px;
+    scroll-margin-bottom: 64px;
+  }
+
+  .game-wrap.scroll-reveal .game-card.next-game {
+    animation: nextGameGlow 1.4s ease 0.5s 2;
+  }
+
+  @keyframes nextGameGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(200,170,90,0.08); }
+    50% { box-shadow: 0 0 36px rgba(200,170,90,0.28); border-color: var(--accent); }
+  }
+
   .game-card.next-game {
     border-color: var(--accent);
     box-shadow: 0 0 20px rgba(200,170,90,0.08);
@@ -894,6 +908,7 @@ games.forEach((g, i) => {
 
   const wrap = document.createElement('div');
   wrap.className = 'game-wrap';
+  if (isNext) wrap.id = 'next-game';
   wrap.style.animationDelay = `${i * 0.04}s`;
 
   const card = document.createElement('div');
@@ -995,6 +1010,28 @@ games.forEach((g, i) => {
   wrap.appendChild(card);
   schedule.appendChild(wrap);
 });
+
+function scrollToNextGame() {
+  if (nextGameIdx === -1) return;
+  const el = document.getElementById('next-game');
+  if (!el) return;
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const introDelay = reducedMotion ? 0 : 700;
+
+  setTimeout(() => {
+    el.scrollIntoView({
+      behavior: reducedMotion ? 'auto' : 'smooth',
+      block: 'center',
+    });
+    if (!reducedMotion) {
+      el.classList.add('scroll-reveal');
+      setTimeout(() => el.classList.remove('scroll-reveal'), 3500);
+    }
+  }, introDelay);
+}
+
+requestAnimationFrame(() => requestAnimationFrame(scrollToNextGame));
 </script>
 </body>
 </html>
