@@ -537,6 +537,70 @@
     padding: 4px 0 8px;
   }
 
+  .box-score-summary {
+    margin: 10px 0 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .box-score-tables {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .box-score-block h5 {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    margin: 0 0 6px;
+  }
+
+  .box-score-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .box-score-table th,
+  .box-score-table td {
+    padding: 4px 5px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .box-score-table th {
+    color: var(--text-dim);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.62rem;
+  }
+
+  .box-score-table .team-col {
+    text-align: left;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .box-score-table tr.dk-row td {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  @media (max-width: 520px) {
+    .box-score-tables {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+  }
+
   .running-total {
     font-family: 'Oswald', sans-serif;
     font-size: 0.78rem;
@@ -685,79 +749,1002 @@
 
 <script>
 const games = [
-  { date: "2026-03-15", dayName: "Sun", dayNum: "15", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 9, opp: 0 }, photos: "https://www.facebook.com/61551355211283/photos/a.122239988414045173", dkGoals: [
-    { period: "2nd", time: "14:21", scorer: "Taku Ide", assists: ["Lindsey Utter"], scoreAtTime: "Rhi 0, Buc 1" },
-    { period: "2nd", time: "2:09", scorer: "Calen French", assists: [], scoreAtTime: "Rhi 0, Buc 2" },
-    { period: "2nd", time: "1:02", scorer: "James Gillitt", assists: ["Xavier Cutting"], scoreAtTime: "Rhi 0, Buc 3" },
-    { period: "3rd", time: "15:45", scorer: "Aidan Atkins", assists: [], scoreAtTime: "Rhi 0, Buc 4" },
-    { period: "3rd", time: "13:57", scorer: "Caleb Perry", assists: [], badges: ["PPG"], scoreAtTime: "Rhi 0, Buc 5" },
-    { period: "3rd", time: "11:51", scorer: "Taku Ide", assists: ["Andrew Litten"], scoreAtTime: "Rhi 0, Buc 6" },
-    { period: "3rd", time: "8:19", scorer: "Calen French", assists: ["Aidan Atkins"], scoreAtTime: "Rhi 0, Buc 7" },
-    { period: "3rd", time: "6:45", scorer: "Mathew Hartikainen", assists: ["James Gillitt"], scoreAtTime: "Rhi 0, Buc 8" },
-    { period: "3rd", time: "0:09", scorer: "Xavier Cutting", assists: ["Mathew Hartikainen"], scoreAtTime: "Rhi 0, Buc 9" },
-  ] },
-  { date: "2026-03-22", dayName: "Sun", dayNum: "22", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 6, opp: 2 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122243058026045173", dkGoals: [
-    { period: "1st", time: "4:34", scorer: "Andrew Litten", assists: ["Dayle Leahy", "Aaron Moeller"], scoreAtTime: "Sea 0, Buc 1" },
-    { period: "2nd", time: "15:37", scorer: "Calen French", assists: ["Jonah Hicks", "Aidan Atkins"], scoreAtTime: "Sea 0, Buc 2" },
-    { period: "2nd", time: "13:36", scorer: "Grace Kalambokas", assists: [], scoreAtTime: "Sea 0, Buc 3" },
-    { period: "2nd", time: "4:11", scorer: "Andrew Litten", assists: ["Taku Ide", "Dayle Leahy"], scoreAtTime: "Sea 1, Buc 4" },
-    { period: "3rd", time: "10:03", scorer: "Dayle Leahy", assists: ["Taku Ide"], badges: ["PPG"], scoreAtTime: "Sea 1, Buc 5" },
-    { period: "3rd", time: "9:08", scorer: "Calen French", assists: ["Aidan Atkins"], scoreAtTime: "Sea 2, Buc 6" },
-  ] },
-  { date: "2026-03-29", dayName: "Sun", dayNum: "29", month: "March", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 6, opp: 3 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122243082578045173", dkGoals: [
-    { period: "1st", time: "6:39", scorer: "Aidan Atkins", assists: ["Dayle Leahy", "Jonah Hicks"], scoreAtTime: "Old 0, Buc 1" },
-    { period: "1st", time: "2:56", scorer: "Aidan Atkins", assists: ["Jonah Hicks", "Anders Madsen"], scoreAtTime: "Old 0, Buc 2" },
-    { period: "2nd", time: "8:58", scorer: "Xavier Cutting", assists: ["Grace Kalambokas"], scoreAtTime: "Old 1, Buc 3" },
-    { period: "2nd", time: "6:12", scorer: "Calen French", assists: ["Jonah Hicks", "Aidan Atkins"], scoreAtTime: "Old 1, Buc 4" },
-    { period: "2nd", time: "5:38", scorer: "Aidan Atkins", assists: ["Jonah Hicks"], scoreAtTime: "Old 2, Buc 5" },
-    { period: "3rd", time: "8:06", scorer: "Calen French", assists: ["Caleb Perry"], badges: ["SHG"], scoreAtTime: "Old 3, Buc 6" },
-  ] },
-  { date: "2026-04-19", dayName: "Sun", dayNum: "19", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Dragons", venue: "Acacia IceWorld", vclass: "venue-acacia", score: { dk: 7, opp: 2 }, photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122244702344045173", dkGoals: [
-    { period: "1st", time: "10:30", scorer: "Caleb Perry", assists: [], scoreAtTime: "Dra 0, Buc 1" },
-    { period: "1st", time: "9:35", scorer: "James Gillitt", assists: [], scoreAtTime: "Dra 0, Buc 2" },
-    { period: "1st", time: "3:44", scorer: "Calen French", assists: ["Caleb Perry"], badges: ["PPG"], scoreAtTime: "Dra 0, Buc 3" },
-    { period: "2nd", time: "16:38", scorer: "Lindsey Utter", assists: ["Dayle Leahy"], scoreAtTime: "Dra 1, Buc 4" },
-    { period: "2nd", time: "9:51", scorer: "Calen French", assists: ["Caleb Perry"], scoreAtTime: "Dra 1, Buc 5" },
-    { period: "3rd", time: "16:23", scorer: "Xavier Cutting", assists: [], scoreAtTime: "Dra 1, Buc 6" },
-    { period: "3rd", time: "4:22", scorer: "Taku Ide", assists: ["Dayle Leahy", "James Gillitt"], scoreAtTime: "Dra 2, Buc 7" },
-  ] },
-  { date: "2026-04-26", dayName: "Sun", dayNum: "26", month: "April", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Puckers", venue: "Acacia IceWorld", vclass: "venue-acacia", score: { dk: 2, opp: 2 }, photos: "https://www.facebook.com/media/set/?set=a.122244796292045173&type=3", dkGoals: [
-    { period: "1st", time: "2:19", scorer: "Aidan Atkins", assists: ["Aaron Moeller"], scoreAtTime: "Puc 0, Buc 1" },
-    { period: "3rd", time: "6:18", scorer: "Aidan Atkins", assists: ["Jonah Hicks"], scoreAtTime: "Puc 1, Buc 2" },
-  ] },
-  { date: "2026-05-03", dayName: "Sun", dayNum: "3", month: "May", start: "8:30 PM", end: "9:30 PM", ha: "home", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 8, opp: 4 }, dkGoals: [
-    { period: "1st", time: "15:45", scorer: "Aidan Atkins", assists: ["Calen French", "Jonah Hicks"], scoreAtTime: "Rhi 0, Buc 1" },
-    { period: "1st", time: "7:20", scorer: "Xavier Cutting", assists: ["Andrew Litten", "Connor MacKenzie"], scoreAtTime: "Rhi 1, Buc 2" },
-    { period: "1st", time: "2:12", scorer: "Andrew Litten", assists: ["Calen French", "Xavier Cutting"], scoreAtTime: "Rhi 1, Buc 3" },
-    { period: "2nd", time: "16:35", scorer: "Taku Ide", assists: ["James Gillitt"], scoreAtTime: "Rhi 2, Buc 4" },
-    { period: "2nd", time: "7:00", scorer: "Taku Ide", assists: ["James Gillitt", "Andrew Litten"], scoreAtTime: "Rhi 2, Buc 5" },
-    { period: "2nd", time: "5:30", scorer: "Grace Kalambokas", assists: ["Andrew Litten"], scoreAtTime: "Rhi 3, Buc 6" },
-    { period: "3rd", time: "9:26", scorer: "Taku Ide", assists: ["Lindsey Utter"], scoreAtTime: "Rhi 3, Buc 7" },
-    { period: "3rd", time: "1:43", scorer: "Grace Kalambokas", assists: ["Jonah Hicks"], scoreAtTime: "Rhi 4, Buc 8" },
-  ] },
-  { date: "2026-05-10", dayName: "Sun", dayNum: "10", month: "May", start: "6:00 PM", end: "7:00 PM", ha: "home", opp: "Puckers", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 2, opp: 4 }, dkGoals: [
-    { period: "2nd", time: "13:21", scorer: "Taku Ide", assists: ["Aidan Atkins"], scoreAtTime: "Puc 2, Buc 1" },
-    { period: "3rd", time: "8:51", scorer: "Calen French", assists: ["Grace Kalambokas"], scoreAtTime: "Puc 3, Buc 2" },
-  ] },
-  { date: "2026-05-17", dayName: "Sun", dayNum: "17", month: "May", start: "9:30 PM", end: "10:30 PM", ha: "home", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall", score: { dk: 7, opp: 2 }, dkGoals: [
-    { period: "1st", time: "3:48", scorer: "Xavier Cutting", assists: ["James Gillitt", "Taku Ide"], scoreAtTime: "Sea 0, Buc 1" },
-    { period: "2nd", time: "17:17", scorer: "Aaron Moeller", assists: [], badges: ["SHG", "3v5"], scoreAtTime: "Sea 0, Buc 2" },
-    { period: "2nd", time: "8:36", scorer: "James Gillitt", assists: ["Taku Ide", "Andrew Litten"], scoreAtTime: "Sea 1, Buc 3" },
-    { period: "2nd", time: "5:06", scorer: "Calen French", assists: ["Jonah Hicks"], badges: ["PPG"], scoreAtTime: "Sea 1, Buc 4" },
-    { period: "2nd", time: "3:16", scorer: "Taku Ide", assists: ["Xavier Cutting"], scoreAtTime: "Sea 1, Buc 5" },
-    { period: "3rd", time: "16:07", scorer: "Calen French", assists: [], badges: ["PPG"], scoreAtTime: "Sea 2, Buc 6" },
-    { period: "3rd", time: "11:35", scorer: "Jonah Hicks", assists: ["Aidan Atkins", "Calen French"], scoreAtTime: "Sea 2, Buc 7" },
-  ] },
-  { date: "2026-05-24", dayName: "Sun", dayNum: "24", month: "May", start: "9:30 PM", end: "10:30 PM", ha: "away", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall" },
-  { date: "2026-06-07", dayName: "Sun", dayNum: "7", month: "June", start: "7:00 PM", end: "8:00 PM", ha: "home", opp: "Dragons", venue: "Boondall IceWorld", vclass: "venue-boondall" },
-  { date: "2026-06-14", dayName: "Sun", dayNum: "14", month: "June", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Drop Bears", venue: "Acacia IceWorld", vclass: "venue-acacia" },
-  { date: "2026-06-21", dayName: "Sun", dayNum: "21", month: "June", start: "8:15 PM", end: "9:15 PM", ha: "away", opp: "Sea Dogs", venue: "Boondall IceWorld", vclass: "venue-boondall" },
-  { date: "2026-07-05", dayName: "Sun", dayNum: "5", month: "July", start: "6:00 PM", end: "7:00 PM", ha: "away", opp: "Dragons", venue: "Acacia IceWorld", vclass: "venue-acacia" },
-  { date: "2026-07-12", dayName: "Sun", dayNum: "12", month: "July", start: "6:00 PM", end: "7:00 PM", ha: "away", opp: "Puckers", venue: "Acacia IceWorld", vclass: "venue-acacia" },
-  { date: "2026-07-19", dayName: "Sun", dayNum: "19", month: "July", start: "8:15 PM", end: "9:15 PM", ha: "home", opp: "Old Timers", venue: "Boondall IceWorld", vclass: "venue-boondall" },
-  { date: "2026-07-26", dayName: "Sun", dayNum: "26", month: "July", start: "6:00 PM", end: "7:00 PM", ha: "home", opp: "Drop Bears", venue: "Boondall IceWorld", vclass: "venue-boondall" },
-  { date: "2026-08-02", dayName: "Sun", dayNum: "2", month: "August", start: "7:15 PM", end: "8:15 PM", ha: "home", opp: "Drop Bears", venue: "Boondall IceWorld", vclass: "venue-boondall" },
-  { date: "2026-08-09", dayName: "Sun", dayNum: "9", month: "August", start: "7:15 PM", end: "8:15 PM", ha: "away", opp: "Rhinos", venue: "Boondall IceWorld", vclass: "venue-boondall" },
+  {
+    date: "2026-03-15",
+    dayName: "Sun",
+    dayNum: "15",
+    month: "March",
+    start: "7:15 PM",
+    end: "8:15 PM",
+    ha: "away",
+    opp: "Rhinos",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall",
+    score: {
+      dk: 9,
+      opp: 0
+    },
+    boxScore: {
+      teams: [
+        {
+          teamId: "672741",
+          name: "Buccaneers Dark Knights",
+          periods: [0, 3, 6],
+          total: 9,
+          sog: "28 (11-7-10)",
+          pp: "1/2",
+          pim: 2,
+          isDarkKnights: true
+        },
+        {
+          teamId: "672736",
+          name: "Buccaneers Rhinos",
+          periods: [0, 0, 0],
+          total: 0,
+          sog: "13 (3-6-4)",
+          pp: "0/1",
+          pim: 4,
+          isDarkKnights: false
+        }
+      ]
+    },
+    photos: "https://www.facebook.com/61551355211283/photos/a.122239988414045173",
+    dkGoals: [
+      {
+        period: "2nd",
+        time: "14:21",
+        scorer: "Taku Ide",
+        assists: [
+          "Lindsey Utter"
+        ],
+        scoreAtTime: "Rhi 0, Buc 1"
+      },
+      {
+        period: "2nd",
+        time: "2:09",
+        scorer: "Calen French",
+        assists: [],
+        scoreAtTime: "Rhi 0, Buc 2"
+      },
+      {
+        period: "2nd",
+        time: "1:02",
+        scorer: "James Gillitt",
+        assists: [
+          "Xavier Cutting"
+        ],
+        scoreAtTime: "Rhi 0, Buc 3"
+      },
+      {
+        period: "3rd",
+        time: "15:45",
+        scorer: "Aidan Atkins",
+        assists: [],
+        scoreAtTime: "Rhi 0, Buc 4"
+      },
+      {
+        period: "3rd",
+        time: "13:57",
+        scorer: "Caleb Perry",
+        assists: [],
+        badges: [
+          "PPG"
+        ],
+        scoreAtTime: "Rhi 0, Buc 5"
+      },
+      {
+        period: "3rd",
+        time: "11:51",
+        scorer: "Taku Ide",
+        assists: [
+          "Andrew Litten"
+        ],
+        scoreAtTime: "Rhi 0, Buc 6"
+      },
+      {
+        period: "3rd",
+        time: "8:19",
+        scorer: "Calen French",
+        assists: [
+          "Aidan Atkins"
+        ],
+        scoreAtTime: "Rhi 0, Buc 7"
+      },
+      {
+        period: "3rd",
+        time: "6:45",
+        scorer: "Mathew Hartikainen",
+        assists: [
+          "James Gillitt"
+        ],
+        scoreAtTime: "Rhi 0, Buc 8"
+      },
+      {
+        period: "3rd",
+        time: "0:09",
+        scorer: "Xavier Cutting",
+        assists: [
+          "Mathew Hartikainen"
+        ],
+        scoreAtTime: "Rhi 0, Buc 9"
+      }
+    ]
+  },
+  {
+    date: "2026-03-22",
+    dayName: "Sun",
+    dayNum: "22",
+    month: "March",
+    start: "7:15 PM",
+    end: "8:15 PM",
+    ha: "home",
+    opp: "Sea Dogs",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall",
+    score: {
+      dk: 6,
+      opp: 2
+    },
+    photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122243058026045173",
+    dkGoals: [
+      {
+        period: "1st",
+        time: "4:34",
+        scorer: "Andrew Litten",
+        assists: [
+          "Dayle Leahy",
+          "Aaron Moeller"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 0, Buc 1"
+      },
+      {
+        period: "2nd",
+        time: "15:37",
+        scorer: "Calen French",
+        assists: [
+          "Jonah Hicks",
+          "Aidan Atkins"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 0, Buc 2"
+      },
+      {
+        period: "2nd",
+        time: "13:36",
+        scorer: "Grace Kalambokas",
+        assists: [],
+        badges: [],
+        scoreAtTime: "Buc 0, Buc 3"
+      },
+      {
+        period: "2nd",
+        time: "4:11",
+        scorer: "Andrew Litten",
+        assists: [
+          "Taku Ide",
+          "Dayle Leahy"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 1, Buc 4"
+      },
+      {
+        period: "3rd",
+        time: "10:03",
+        scorer: "Dayle Leahy",
+        assists: [
+          "Taku Ide"
+        ],
+        badges: [
+          "PPG"
+        ],
+        scoreAtTime: "Buc 2, Buc 5"
+      },
+      {
+        period: "3rd",
+        time: "9:08",
+        scorer: "Calen French",
+        assists: [
+          "Aidan Atkins"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 6"
+      }
+    ],
+    gameId: "2516393",
+    boxScore: {
+      teams: [
+        {
+          teamId: "672739",
+          name: "Buccaneers Sea Dogs Div 2",
+          periods: [
+            0,
+            1,
+            1
+          ],
+          total: 2,
+          sog: "16 (5-3-8)",
+          pp: "0/2",
+          pim: 2,
+          isDarkKnights: false
+        },
+        {
+          teamId: "672741",
+          name: "Buccaneers Dark Knights",
+          periods: [
+            1,
+            3,
+            2
+          ],
+          total: 6,
+          sog: "32 (10-11-11)",
+          pp: "1/1",
+          pim: 4,
+          isDarkKnights: true
+        }
+      ]
+    }
+  },
+  {
+    date: "2026-03-29",
+    dayName: "Sun",
+    dayNum: "29",
+    month: "March",
+    start: "7:15 PM",
+    end: "8:15 PM",
+    ha: "home",
+    opp: "Old Timers",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall",
+    score: {
+      dk: 6,
+      opp: 3
+    },
+    photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122243082578045173",
+    dkGoals: [
+      {
+        period: "1st",
+        time: "6:39",
+        scorer: "Aidan Atkins",
+        assists: [
+          "Dayle Leahy",
+          "Jonah Hicks"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 1"
+      },
+      {
+        period: "1st",
+        time: "2:56",
+        scorer: "Aidan Atkins",
+        assists: [
+          "Jonah Hicks",
+          "Anders Madsen"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 2"
+      },
+      {
+        period: "2nd",
+        time: "8:58",
+        scorer: "Xavier Cutting",
+        assists: [
+          "Grace Kalambokas"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 3"
+      },
+      {
+        period: "2nd",
+        time: "6:12",
+        scorer: "Calen French",
+        assists: [
+          "Jonah Hicks",
+          "Aidan Atkins"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 4"
+      },
+      {
+        period: "2nd",
+        time: "5:38",
+        scorer: "Aidan Atkins",
+        assists: [
+          "Jonah Hicks"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 5"
+      },
+      {
+        period: "3rd",
+        time: "8:06",
+        scorer: "Calen French",
+        assists: [
+          "White Chocolate"
+        ],
+        badges: [
+          "SHG"
+        ],
+        scoreAtTime: "Buc 2, Buc 6"
+      }
+    ],
+    gameId: "2516399",
+    boxScore: {
+      teams: [
+        {
+          teamId: "672735",
+          name: "Buccaneers Old Timers",
+          periods: [
+            2,
+            0,
+            1
+          ],
+          total: 3,
+          sog: "17 (5-4-8)",
+          pp: "0/3",
+          pim: 6,
+          isDarkKnights: false
+        },
+        {
+          teamId: "672741",
+          name: "Buccaneers Dark Knights",
+          periods: [
+            2,
+            3,
+            1
+          ],
+          total: 6,
+          sog: "31 (7-14-10)",
+          pp: "0/3",
+          pim: 6,
+          isDarkKnights: true
+        }
+      ]
+    }
+  },
+  {
+    date: "2026-04-19",
+    dayName: "Sun",
+    dayNum: "19",
+    month: "April",
+    start: "7:15 PM",
+    end: "8:15 PM",
+    ha: "away",
+    opp: "Dragons",
+    venue: "Acacia IceWorld",
+    vclass: "venue-acacia",
+    score: {
+      dk: 7,
+      opp: 2
+    },
+    photos: "https://www.facebook.com/media/set/?vanity=61551355211283&set=a.122244702344045173",
+    dkGoals: [
+      {
+        period: "1st",
+        time: "10:30",
+        scorer: "White Chocolate",
+        assists: [],
+        badges: [],
+        scoreAtTime: "Buc 1, Sta 0"
+      },
+      {
+        period: "1st",
+        time: "9:35",
+        scorer: "James Gillitt",
+        assists: [],
+        badges: [],
+        scoreAtTime: "Buc 2, Sta 0"
+      },
+      {
+        period: "1st",
+        time: "3:44",
+        scorer: "Calen French",
+        assists: [
+          "White Chocolate"
+        ],
+        badges: [
+          "PPG"
+        ],
+        scoreAtTime: "Buc 3, Sta 0"
+      },
+      {
+        period: "2nd",
+        time: "16:38",
+        scorer: "Lindsey Utter",
+        assists: [
+          "Dayle Leahy"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 4, Sta 0"
+      },
+      {
+        period: "2nd",
+        time: "9:51",
+        scorer: "Calen French",
+        assists: [
+          "White Chocolate"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 5, Sta 1"
+      },
+      {
+        period: "3rd",
+        time: "16:23",
+        scorer: "Xavier Cutting",
+        assists: [],
+        badges: [],
+        scoreAtTime: "Buc 6, Sta 2"
+      },
+      {
+        period: "3rd",
+        time: "4:22",
+        scorer: "Taku Ide",
+        assists: [
+          "Dayle Leahy",
+          "James Gillitt"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 7, Sta 2"
+      }
+    ],
+    gameId: "2516410",
+    boxScore: {
+      teams: [
+        {
+          teamId: "672741",
+          name: "Buccaneers Dark Knights",
+          periods: [
+            3,
+            2,
+            2
+          ],
+          total: 7,
+          sog: "25 (11-7-7)",
+          pp: "1/6",
+          pim: 2,
+          isDarkKnights: true
+        },
+        {
+          teamId: "672719",
+          name: "Stars Dragons Div 2",
+          periods: [
+            0,
+            2,
+            0
+          ],
+          total: 2,
+          sog: "11 (4-4-3)",
+          pp: "0/1",
+          pim: 12,
+          isDarkKnights: false
+        }
+      ]
+    }
+  },
+  {
+    date: "2026-04-26",
+    dayName: "Sun",
+    dayNum: "26",
+    month: "April",
+    start: "7:15 PM",
+    end: "8:15 PM",
+    ha: "away",
+    opp: "Puckers",
+    venue: "Acacia IceWorld",
+    vclass: "venue-acacia",
+    score: {
+      dk: 2,
+      opp: 2
+    },
+    photos: "https://www.facebook.com/media/set/?set=a.122244796292045173&type=3",
+    dkGoals: [
+      {
+        period: "1st",
+        time: "2:19",
+        scorer: "Aidan Atkins",
+        assists: [
+          "Aaron Moeller"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 1, Sta 1"
+      },
+      {
+        period: "3rd",
+        time: "6:18",
+        scorer: "Aidan Atkins",
+        assists: [
+          "Jonah Hicks"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Sta 2"
+      }
+    ],
+    gameId: "2516415",
+    boxScore: {
+      teams: [
+        {
+          teamId: "672741",
+          name: "Buccaneers Dark Knights",
+          periods: [
+            1,
+            0,
+            1
+          ],
+          total: 2,
+          sog: "23 (12-6-5)",
+          pp: "0/1",
+          pim: 6,
+          isDarkKnights: true
+        },
+        {
+          teamId: "672718",
+          name: "Stars Puckers Div 2",
+          periods: [
+            1,
+            0,
+            1
+          ],
+          total: 2,
+          sog: "24 (9-4-11)",
+          pp: "0/0",
+          pim: 12,
+          isDarkKnights: false
+        }
+      ]
+    }
+  },
+  {
+    date: "2026-05-03",
+    dayName: "Sun",
+    dayNum: "3",
+    month: "May",
+    start: "8:30 PM",
+    end: "9:30 PM",
+    ha: "home",
+    opp: "Rhinos",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall",
+    gameId: "2516422",
+    score: {
+      dk: 8,
+      opp: 4
+    },
+    boxScore: {
+      teams: [
+        {
+          teamId: "672736",
+          name: "Buccaneers Rhinos",
+          periods: [
+            2,
+            1,
+            1
+          ],
+          total: 4,
+          sog: "21 (9-5-7)",
+          pp: "0/0",
+          pim: 0,
+          isDarkKnights: false
+        },
+        {
+          teamId: "672741",
+          name: "Buccaneers Dark Knights",
+          periods: [
+            3,
+            3,
+            2
+          ],
+          total: 8,
+          sog: "28 (7-14-7)",
+          pp: "0/0",
+          pim: 0,
+          isDarkKnights: true
+        }
+      ]
+    },
+    dkGoals: [
+      {
+        period: "1st",
+        time: "15:45",
+        scorer: "Aidan Atkins",
+        assists: [
+          "Calen French",
+          "Jonah Hicks"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 0, Buc 1"
+      },
+      {
+        period: "1st",
+        time: "7:20",
+        scorer: "Xavier Cutting",
+        assists: [
+          "Andrew Litten",
+          "Connor MacKenzie"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 2"
+      },
+      {
+        period: "1st",
+        time: "2:12",
+        scorer: "Andrew Litten",
+        assists: [
+          "Calen French",
+          "Xavier Cutting"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 3"
+      },
+      {
+        period: "2nd",
+        time: "16:35",
+        scorer: "Taku Ide",
+        assists: [
+          "James Gillitt"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 4"
+      },
+      {
+        period: "2nd",
+        time: "7:00",
+        scorer: "Taku Ide",
+        assists: [
+          "James Gillitt",
+          "Andrew Litten"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 3, Buc 5"
+      },
+      {
+        period: "2nd",
+        time: "5:30",
+        scorer: "Grace Kalambokas",
+        assists: [
+          "Andrew Litten"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 3, Buc 6"
+      },
+      {
+        period: "3rd",
+        time: "9:26",
+        scorer: "Taku Ide",
+        assists: [
+          "Lindsey Utter"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 3, Buc 7"
+      },
+      {
+        period: "3rd",
+        time: "1:43",
+        scorer: "Grace Kalambokas",
+        assists: [
+          "Jonah Hicks"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 3, Buc 8"
+      }
+    ]
+  },
+  {
+    date: "2026-05-10",
+    dayName: "Sun",
+    dayNum: "10",
+    month: "May",
+    start: "6:00 PM",
+    end: "7:00 PM",
+    ha: "home",
+    opp: "Puckers",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall",
+    gameId: "2516424",
+    score: {
+      dk: 2,
+      opp: 4
+    },
+    boxScore: {
+      teams: [
+        {
+          teamId: "672718",
+          name: "Stars Puckers Div 2",
+          periods: [
+            2,
+            1,
+            1
+          ],
+          total: 4,
+          sog: "16 (4-6-6)",
+          pp: "0/2",
+          pim: 0,
+          isDarkKnights: false
+        },
+        {
+          teamId: "672741",
+          name: "Buccaneers Dark Knights",
+          periods: [
+            0,
+            1,
+            1
+          ],
+          total: 2,
+          sog: "15 (4-6-5)",
+          pp: "0/0",
+          pim: 4,
+          isDarkKnights: true
+        }
+      ]
+    },
+    dkGoals: [
+      {
+        period: "2nd",
+        time: "13:21",
+        scorer: "Taku Ide",
+        assists: [
+          "Aidan Atkins"
+        ],
+        badges: [],
+        scoreAtTime: "Sta 2, Buc 1"
+      },
+      {
+        period: "3rd",
+        time: "8:51",
+        scorer: "Calen French",
+        assists: [
+          "Grace Kalambokas"
+        ],
+        badges: [],
+        scoreAtTime: "Sta 4, Buc 2"
+      }
+    ]
+  },
+  {
+    date: "2026-05-17",
+    dayName: "Sun",
+    dayNum: "17",
+    month: "May",
+    start: "9:30 PM",
+    end: "10:30 PM",
+    ha: "home",
+    opp: "Sea Dogs",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall",
+    gameId: "2516434",
+    score: {
+      dk: 7,
+      opp: 2
+    },
+    boxScore: {
+      teams: [
+        {
+          teamId: "672739",
+          name: "Buccaneers Sea Dogs Div 2",
+          periods: [
+            0,
+            2,
+            0
+          ],
+          total: 2,
+          sog: "20 (3-12-5)",
+          pp: "0/4",
+          pim: 20,
+          isDarkKnights: false
+        },
+        {
+          teamId: "672741",
+          name: "Buccaneers Dark Knights",
+          periods: [
+            1,
+            4,
+            2
+          ],
+          total: 7,
+          sog: "22 (5-8-9)",
+          pp: "2/6",
+          pim: 14,
+          isDarkKnights: true
+        }
+      ]
+    },
+    dkGoals: [
+      {
+        period: "1st",
+        time: "3:48",
+        scorer: "Xavier Cutting",
+        assists: [
+          "James Gillitt",
+          "Taku Ide"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 0, Buc 1"
+      },
+      {
+        period: "2nd",
+        time: "17:17",
+        scorer: "Aaron Moeller",
+        assists: [],
+        badges: [
+          "SHG"
+        ],
+        scoreAtTime: "Buc 0, Buc 2"
+      },
+      {
+        period: "2nd",
+        time: "8:36",
+        scorer: "James Gillitt",
+        assists: [
+          "Taku Ide",
+          "Andrew Litten"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 1, Buc 3"
+      },
+      {
+        period: "2nd",
+        time: "5:06",
+        scorer: "Calen French",
+        assists: [
+          "Jonah Hicks"
+        ],
+        badges: [
+          "PPG"
+        ],
+        scoreAtTime: "Buc 1, Buc 4"
+      },
+      {
+        period: "2nd",
+        time: "3:16",
+        scorer: "Taku Ide",
+        assists: [
+          "Xavier Cutting"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 1, Buc 5"
+      },
+      {
+        period: "3rd",
+        time: "16:07",
+        scorer: "Calen French",
+        assists: [],
+        badges: [
+          "PPG"
+        ],
+        scoreAtTime: "Buc 2, Buc 6"
+      },
+      {
+        period: "3rd",
+        time: "11:35",
+        scorer: "Jonah Hicks",
+        assists: [
+          "Aidan Atkins",
+          "Calen French"
+        ],
+        badges: [],
+        scoreAtTime: "Buc 2, Buc 7"
+      }
+    ]
+  },
+  {
+    date: "2026-05-24",
+    dayName: "Sun",
+    dayNum: "24",
+    month: "May",
+    start: "9:30 PM",
+    end: "10:30 PM",
+    ha: "away",
+    opp: "Old Timers",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall"
+  },
+  {
+    date: "2026-06-07",
+    dayName: "Sun",
+    dayNum: "7",
+    month: "June",
+    start: "7:00 PM",
+    end: "8:00 PM",
+    ha: "home",
+    opp: "Dragons",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall"
+  },
+  {
+    date: "2026-06-14",
+    dayName: "Sun",
+    dayNum: "14",
+    month: "June",
+    start: "7:15 PM",
+    end: "8:15 PM",
+    ha: "away",
+    opp: "Drop Bears",
+    venue: "Acacia IceWorld",
+    vclass: "venue-acacia"
+  },
+  {
+    date: "2026-06-21",
+    dayName: "Sun",
+    dayNum: "21",
+    month: "June",
+    start: "8:15 PM",
+    end: "9:15 PM",
+    ha: "away",
+    opp: "Sea Dogs",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall"
+  },
+  {
+    date: "2026-07-05",
+    dayName: "Sun",
+    dayNum: "5",
+    month: "July",
+    start: "6:00 PM",
+    end: "7:00 PM",
+    ha: "away",
+    opp: "Dragons",
+    venue: "Acacia IceWorld",
+    vclass: "venue-acacia"
+  },
+  {
+    date: "2026-07-12",
+    dayName: "Sun",
+    dayNum: "12",
+    month: "July",
+    start: "6:00 PM",
+    end: "7:00 PM",
+    ha: "away",
+    opp: "Puckers",
+    venue: "Acacia IceWorld",
+    vclass: "venue-acacia"
+  },
+  {
+    date: "2026-07-19",
+    dayName: "Sun",
+    dayNum: "19",
+    month: "July",
+    start: "8:15 PM",
+    end: "9:15 PM",
+    ha: "home",
+    opp: "Old Timers",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall"
+  },
+  {
+    date: "2026-07-26",
+    dayName: "Sun",
+    dayNum: "26",
+    month: "July",
+    start: "6:00 PM",
+    end: "7:00 PM",
+    ha: "home",
+    opp: "Drop Bears",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall"
+  },
+  {
+    date: "2026-08-02",
+    dayName: "Sun",
+    dayNum: "2",
+    month: "August",
+    start: "7:15 PM",
+    end: "8:15 PM",
+    ha: "home",
+    opp: "Drop Bears",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall"
+  },
+  {
+    date: "2026-08-09",
+    dayName: "Sun",
+    dayNum: "9",
+    month: "August",
+    start: "7:15 PM",
+    end: "8:15 PM",
+    ha: "away",
+    opp: "Rhinos",
+    venue: "Boondall IceWorld",
+    vclass: "venue-boondall"
+  }
 ];
 
 const today = new Date();
@@ -835,16 +1822,65 @@ function assistPhraseWithTotals(assists, totals) {
   return assists.map(a => `${displayPlayerName(a)} <span class="running-total">(${totals[a]})</span>`).join(', ');
 }
 
+function boxScoreTeamLabel(team, game) {
+  if (team.isDarkKnights) return 'Dark Knights';
+  return game.opp || team.name.replace(/^(Buccaneers|Stars)\s+/, '');
+}
+
+function buildBoxScoreSummaryHtml(g) {
+  if (!g.boxScore || !g.boxScore.teams || g.boxScore.teams.length < 2) return '';
+
+  const teams = g.boxScore.teams;
+  if (teams.length < 2) return '';
+
+  const periodCount = Math.max(...teams.map(t => t.periods.length));
+  const periodHeaders = Array.from({ length: periodCount }, (_, i) => i + 1);
+
+  function scoringRow(team) {
+    const cls = team.isDarkKnights ? ' class="dk-row"' : '';
+    const cells = periodHeaders.map((_, i) => `<td>${team.periods[i] ?? '—'}</td>`).join('');
+    return `<tr${cls}><td class="team-col">${boxScoreTeamLabel(team, g)}</td>${cells}<td>${team.total}</td></tr>`;
+  }
+
+  function detailsRow(team) {
+    const cls = team.isDarkKnights ? ' class="dk-row"' : '';
+    const pim = team.pim == null ? '—' : team.pim;
+    return `<tr${cls}><td class="team-col">${boxScoreTeamLabel(team, g)}</td><td>${team.sog}</td><td>${team.pp}</td><td>${pim}</td></tr>`;
+  }
+
+  const periodTh = periodHeaders.map(p => `<th>${p}</th>`).join('');
+
+  return `<div class="box-score-summary">
+    <div class="box-score-tables">
+      <div class="box-score-block">
+        <h5>Scoring</h5>
+        <table class="box-score-table">
+          <thead><tr><th class="team-col">Team</th>${periodTh}<th>T</th></tr></thead>
+          <tbody>${teams.map(scoringRow).join('')}</tbody>
+        </table>
+      </div>
+      <div class="box-score-block">
+        <h5>Details</h5>
+        <table class="box-score-table">
+          <thead><tr><th class="team-col">Team</th><th>SOG</th><th>PP</th><th>PIM</th></tr></thead>
+          <tbody>${teams.map(detailsRow).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
 function buildGoalsPanel(g) {
   const panel = document.createElement('div');
   panel.className = 'game-goals-panel';
   panel.id = `goals-${g.date}`;
   panel.setAttribute('role', 'region');
+  let html = buildBoxScoreSummaryHtml(g);
+
   if (!g.dkGoals || g.dkGoals.length === 0) {
-    panel.innerHTML = '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
+    panel.innerHTML = html + '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
     return panel;
   }
-  let html = '';
   
   const periods = {};
   for (const goal of g.dkGoals) {
@@ -852,6 +1888,8 @@ function buildGoalsPanel(g) {
     periods[goal.period].push(goal);
   }
   
+  if (html) html += goalsSectionHeading();
+
   for (const period of ["1st", "2nd", "3rd", "OT", "SO"]) {
     if (!periods[period]) continue;
     html += `<div class="period-header">${period} Period</div>`;
@@ -890,6 +1928,11 @@ function buildGoalsPanel(g) {
   
   panel.innerHTML = html;
   return panel;
+}
+
+// Goals section heading when goal list follows box score summary
+function goalsSectionHeading() {
+  return '<h4>Dark Knights Goals</h4>';
 }
 
 games.forEach((g, i) => {
