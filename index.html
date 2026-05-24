@@ -1827,6 +1827,50 @@ function boxScoreTeamLabel(team, game) {
   return game.opp || team.name.replace(/^(Buccaneers|Stars)\s+/, '');
 }
 
+const OPPONENT_SHORT_NAMES = {
+  'Rhinos': 'Rhi',
+  'Sea Dogs': 'Sea',
+  'Old Timers': 'OT',
+  'Dragons': 'Drag',
+  'Puckers': 'Puck',
+  'Drop Bears': 'Bears',
+};
+
+function fallbackShortName(name) {
+  if (!name) return 'Opp';
+  const words = name.trim().split(/\s+/);
+  if (words.length >= 2) return words.map(w => w[0]).join('').slice(0, 4);
+  return name.slice(0, 4);
+}
+
+function opponentShortName(game) {
+  if (game.opp && OPPONENT_SHORT_NAMES[game.opp]) return OPPONENT_SHORT_NAMES[game.opp];
+  if (!game.opp && game.boxScore?.teams) {
+    const oppTeam = game.boxScore.teams.find(t => !t.isDarkKnights);
+    if (oppTeam) {
+      const label = boxScoreTeamLabel(oppTeam, game);
+      return OPPONENT_SHORT_NAMES[label] || fallbackShortName(label);
+    }
+  }
+  return fallbackShortName(game.opp || '');
+}
+
+function parseScoreAtTime(scoreAtTime) {
+  const parts = scoreAtTime.split(/,\s*/).map(p => {
+    const m = p.trim().match(/^([A-Za-z]+)\s+(\d+)$/);
+    return m ? { abbr: m[1], num: m[2] } : null;
+  }).filter(Boolean);
+  if (parts.length !== 2) return { dkNum: null, oppNum: null };
+  const bothBuc = parts.every(p => /^Buc/i.test(p.abbr));
+  if (bothBuc) return { dkNum: parts[1].num, oppNum: parts[0].num };
+  const dkPart = parts.find(p => /^Buc/i.test(p.abbr));
+  const oppPart = parts.find(p => !/^Buc/i.test(p.abbr));
+  return {
+    dkNum: dkPart ? dkPart.num : null,
+    oppNum: oppPart ? oppPart.num : null,
+  };
+}
+
 function buildBoxScoreSummaryHtml(g) {
   if (!g.boxScore || !g.boxScore.teams || g.boxScore.teams.length < 2) return '';
 
@@ -1901,17 +1945,10 @@ function buildGoalsPanel(g) {
       if (goal.scoreAtTime) {
         const jerseySrc = g.ha === 'home' ? 'assets/darkjersey.png' : 'assets/whitejersey.png';
         const jerseyAlt = g.ha === 'home' ? 'Dark Knights (Home)' : 'Dark Knights (Away)';
-        // Parse scoreAtTime e.g. "Sta 1, Buc 0" or "Buc 2, Sta 1" to show icon for Buc score
-        const scoreParts = goal.scoreAtTime.split(/,\s*/);
-        let dkNum = '?', oppPart = 'Opp 0';
-        for (const p of scoreParts) {
-          if (/Buc/i.test(p)) {
-            dkNum = p.replace(/Buc/i, '').trim();
-          } else {
-            oppPart = p.trim();
-          }
-        }
-        scoreHtml = `<span class="goal-score"><img src="${jerseySrc}" alt="${jerseyAlt}" class="score-jersey"> ${dkNum} <span class="score-sep">•</span> ${oppPart}</span>`;
+        const { dkNum, oppNum } = parseScoreAtTime(goal.scoreAtTime);
+        const dkDisplay = dkNum ?? '?';
+        const oppLabel = `${opponentShortName(g)} ${oppNum ?? '?'}`;
+        scoreHtml = `<span class="goal-score"><img src="${jerseySrc}" alt="${jerseyAlt}" class="score-jersey"> ${dkDisplay} <span class="score-sep">•</span> ${oppLabel}</span>`;
       }
       const assistStr = assistPhraseWithTotals(goal.assists, goal._assistTotals);
       const metaEnd = `${badges}${scoreHtml}`;
