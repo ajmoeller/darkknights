@@ -1938,14 +1938,61 @@ function opponentShortName(game) {
   return fallbackShortName(game.opp || '');
 }
 
-function parseScoreAtTime(scoreAtTime) {
+const PERIOD_ORDER = { "1st": 1, "2nd": 2, "3rd": 3, "OT": 4, "SO": 5 };
+
+function goalClockMinutes(time) {
+  const m = (time || "").match(/(\d+):(\d+)/);
+  if (!m) return 0;
+  return parseInt(m[1], 10) + parseInt(m[2], 10) / 60;
+}
+
+function chronologicalDkGoals(game) {
+  return [...(game.dkGoals || [])].sort((a, b) => {
+    const pa = PERIOD_ORDER[a.period] || 99;
+    const pb = PERIOD_ORDER[b.period] || 99;
+    if (pa !== pb) return pa - pb;
+    return goalClockMinutes(b.time) - goalClockMinutes(a.time);
+  });
+}
+
+/** NHL-style GWG: DK goal that gives a one-goal lead they never relinquish. */
+function markGameWinningGoals(game) {
+  (game.dkGoals || []).forEach((goal) => {
+    delete goal.isGWG;
+  });
+  if (!game.dkGoals?.length || !game.score || game.score.dk <= game.score.opp) {
+    return;
+  }
+  const decisiveDkTotal = game.score.opp + 1;
+  for (const goal of chronologicalDkGoals(game)) {
+    if (!goal.scoreAtTime) continue;
+    const { dkNum } = parseScoreAtTime(goal.scoreAtTime, game);
+    if (dkNum == null) continue;
+    if (parseInt(dkNum, 10) === decisiveDkTotal) {
+      goal.isGWG = true;
+      return;
+    }
+  }
+}
+
+function parseScoreAtTime(scoreAtTime, game) {
   const parts = scoreAtTime.split(/,\s*/).map(p => {
     const m = p.trim().match(/^([A-Za-z]+)\s+(\d+)$/);
     return m ? { abbr: m[1], num: m[2] } : null;
   }).filter(Boolean);
   if (parts.length !== 2) return { dkNum: null, oppNum: null };
   const bothBuc = parts.every(p => /^Buc/i.test(p.abbr));
-  if (bothBuc) return { dkNum: parts[1].num, oppNum: parts[0].num };
+  if (bothBuc) {
+    const teams = game?.boxScore?.teams;
+    if (teams && teams.length >= 2) {
+      const dkIdx = teams.findIndex(t => t.isDarkKnights);
+      const oppIdx = dkIdx === 0 ? 1 : 0;
+      if (dkIdx !== -1) {
+        return { dkNum: parts[dkIdx].num, oppNum: parts[oppIdx].num };
+      }
+    }
+    return { dkNum: parts[1].num, oppNum: parts[0].num };
+  }
   const dkPart = parts.find(p => /^Buc/i.test(p.abbr));
   const oppPart = parts.find(p => !/^Buc/i.test(p.abbr));
   return {
@@ -2008,6 +2055,8 @@ function buildGoalsPanel(g) {
     panel.innerHTML = html + '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
     return panel;
   }
+
+  markGameWinningGoals(g);
   
   const periods = {};
   for (const goal of g.dkGoals) {
@@ -2021,14 +2070,16 @@ function buildGoalsPanel(g) {
     if (!periods[period]) continue;
     html += `<div class="period-header">${period} Period</div>`;
     for (const goal of periods[period]) {
-      const badges = (goal.badges && goal.badges.length)
-        ? `<span class="badges">${goal.badges.map((b) => `[${b}]`).join(' ')}</span>`
+      const badgeList = [...(goal.badges || [])];
+      if (goal.isGWG) badgeList.push('GWG');
+      const badges = badgeList.length
+        ? `<span class="badges">${badgeList.map((b) => `[${b}]`).join(' ')}</span>`
         : '';
       let scoreHtml = '';
       if (goal.scoreAtTime) {
         const jerseySrc = g.ha === 'home' ? 'assets/darkjersey.png' : 'assets/whitejersey.png';
         const jerseyAlt = g.ha === 'home' ? 'Dark Knights (Home)' : 'Dark Knights (Away)';
-        const { dkNum, oppNum } = parseScoreAtTime(goal.scoreAtTime);
+        const { dkNum, oppNum } = parseScoreAtTime(goal.scoreAtTime, g);
         const dkDisplay = dkNum ?? '?';
         const oppLabel = `${opponentShortName(g)} ${oppNum ?? '?'}`;
         scoreHtml = `<span class="goal-score"><img src="${jerseySrc}" alt="${jerseyAlt}" class="score-jersey"> ${dkDisplay} <span class="score-sep">•</span> ${oppLabel}</span>`;
