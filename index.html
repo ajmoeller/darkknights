@@ -1938,43 +1938,6 @@ function opponentShortName(game) {
   return fallbackShortName(game.opp || '');
 }
 
-const PERIOD_ORDER = { "1st": 1, "2nd": 2, "3rd": 3, "OT": 4, "SO": 5 };
-
-function goalClockMinutes(time) {
-  const m = (time || "").match(/(\d+):(\d+)/);
-  if (!m) return 0;
-  return parseInt(m[1], 10) + parseInt(m[2], 10) / 60;
-}
-
-function chronologicalDkGoals(game) {
-  return [...(game.dkGoals || [])].sort((a, b) => {
-    const pa = PERIOD_ORDER[a.period] || 99;
-    const pb = PERIOD_ORDER[b.period] || 99;
-    if (pa !== pb) return pa - pb;
-    return goalClockMinutes(b.time) - goalClockMinutes(a.time);
-  });
-}
-
-/** NHL-style GWG: DK goal that gives a one-goal lead they never relinquish. */
-function markGameWinningGoals(game) {
-  (game.dkGoals || []).forEach((goal) => {
-    delete goal.isGWG;
-  });
-  if (!game.dkGoals?.length || !game.score || game.score.dk <= game.score.opp) {
-    return;
-  }
-  const decisiveDkTotal = game.score.opp + 1;
-  for (const goal of chronologicalDkGoals(game)) {
-    if (!goal.scoreAtTime) continue;
-    const { dkNum } = parseScoreAtTime(goal.scoreAtTime, game);
-    if (dkNum == null) continue;
-    if (parseInt(dkNum, 10) === decisiveDkTotal) {
-      goal.isGWG = true;
-      return;
-    }
-  }
-}
-
 function parseScoreAtTime(scoreAtTime, game) {
   const parts = scoreAtTime.split(/,\s*/).map(p => {
     const m = p.trim().match(/^([A-Za-z]+)\s+(\d+)$/);
@@ -2056,8 +2019,6 @@ function buildGoalsPanel(g) {
     return panel;
   }
 
-  markGameWinningGoals(g);
-  
   const periods = {};
   for (const goal of g.dkGoals) {
     if (!periods[goal.period]) periods[goal.period] = [];
@@ -2070,10 +2031,8 @@ function buildGoalsPanel(g) {
     if (!periods[period]) continue;
     html += `<div class="period-header">${period} Period</div>`;
     for (const goal of periods[period]) {
-      const badgeList = [...(goal.badges || [])];
-      if (goal.isGWG) badgeList.push('GWG');
-      const badges = badgeList.length
-        ? `<span class="badges">${badgeList.map((b) => `[${b}]`).join(' ')}</span>`
+      const badges = (goal.badges && goal.badges.length)
+        ? `<span class="badges">${goal.badges.map((b) => `[${b}]`).join(' ')}</span>`
         : '';
       let scoreHtml = '';
       if (goal.scoreAtTime) {
