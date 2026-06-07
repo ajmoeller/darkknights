@@ -21,6 +21,11 @@ for (const game of games) {
   game.gameId = data.gameId;
   game.boxScore = data.boxScore;
   game.dkGoals = data.dkGoals;
+  const dkTeam = data.boxScore?.teams?.find((t) => t.isDarkKnights);
+  const oppTeam = data.boxScore?.teams?.find((t) => !t.isDarkKnights);
+  if (dkTeam && oppTeam) {
+    game.score = { dk: dkTeam.total, opp: oppTeam.total };
+  }
   patched++;
 }
 
