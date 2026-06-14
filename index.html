@@ -711,9 +711,8 @@
 
   .game-share-btn {
     position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 8px;
+    top: 8px;
     z-index: 2;
     width: 16px;
     height: 16px;
@@ -743,12 +742,6 @@
   .game-share-btn.copied {
     opacity: 0.65;
     color: var(--accent);
-  }
-
-  .game-card.next-game .game-share-btn {
-    top: auto;
-    bottom: 8px;
-    transform: none;
   }
 
   /* --- NEXT GAME HIGHLIGHT --- */
@@ -2439,11 +2432,15 @@ function goalsSectionHeading(g) {
 }
 
 function gameShareUrl(date) {
-  return `${location.origin}${location.pathname}${location.search}#game-${date}`;
+  const base = `${location.origin}${location.pathname}`;
+  return `${base}?game=${date}#game-${date}`;
 }
 
 function getSharedGameDate() {
-  const match = location.hash.match(/^#game-(\d{4}-\d{2}-\d{2})$/);
+  const params = new URLSearchParams(location.search);
+  const fromQuery = params.get('game');
+  if (fromQuery && /^\d{4}-\d{2}-\d{2}$/.test(fromQuery)) return fromQuery;
+  const match = location.hash.match(/game-(\d{4}-\d{2}-\d{2})/);
   return match ? match[1] : null;
 }
 
@@ -2491,22 +2488,38 @@ function openSharedGame(date, { scroll = true } = {}) {
   const card = wrap.querySelector('.game-card');
   const panel = wrap.querySelector('.game-goals-panel');
 
-  if (scroll) {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    wrap.scrollIntoView({
-      behavior: reducedMotion ? 'auto' : 'smooth',
-      block: 'center',
-    });
-  }
-
-  if (card?.classList.contains('has-goals-toggle') && panel && !wrap.classList.contains('expanded')) {
+  if (card?.classList.contains('has-goals-toggle') && panel) {
     wrap.classList.add('expanded');
     panel.classList.add('open');
     setMomentClipsPlaying(panel, true);
     card.setAttribute('aria-expanded', 'true');
   }
 
+  if (scroll) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        wrap.scrollIntoView({
+          behavior: reducedMotion ? 'auto' : 'smooth',
+          block: 'start',
+        });
+      });
+    });
+  }
+
   return true;
+}
+
+function initSharedGameLink() {
+  const date = getSharedGameDate();
+  if (!date) return;
+
+  const tryOpen = (attempt = 0) => {
+    if (openSharedGame(date)) return;
+    if (attempt < 20) setTimeout(() => tryOpen(attempt + 1), 50);
+  };
+
+  tryOpen();
 }
 
 games.forEach((g, i) => {
@@ -2626,12 +2639,12 @@ games.forEach((g, i) => {
     ${timeOrScoreHtml}
   `;
 
-  card.appendChild(createGameShareButton(g));
   wrap.appendChild(card);
   schedule.appendChild(wrap);
 });
 
 function scrollToNextGame() {
+  if (getSharedGameDate()) return;
   if (nextGameIdx === -1) return;
   const el = document.querySelector('.game-card.next-game')?.closest('.game-wrap');
   if (!el) return;
@@ -2651,19 +2664,14 @@ function scrollToNextGame() {
   }, introDelay);
 }
 
-const sharedDate = getSharedGameDate();
-if (sharedDate) {
-  requestAnimationFrame(() => {
-    setTimeout(() => openSharedGame(sharedDate), 100);
-  });
+if (getSharedGameDate()) {
+  initSharedGameLink();
 } else {
   requestAnimationFrame(() => requestAnimationFrame(scrollToNextGame));
 }
 
-window.addEventListener('hashchange', () => {
-  const date = getSharedGameDate();
-  if (date) openSharedGame(date);
-});
+window.addEventListener('hashchange', () => initSharedGameLink());
+window.addEventListener('popstate', () => initSharedGameLink());
 </script>
 </body>
 </html>
