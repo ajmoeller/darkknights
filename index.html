@@ -2185,20 +2185,28 @@ document.getElementById('stat-away').textContent = awayRemaining;
 document.getElementById('stat-boondall').textContent = boondallRemaining;
 document.getElementById('stat-acacia').textContent = acaciaRemaining;
 
-// Pre-compute running goal/assist season totals (games are already in chronological order)
+// Pre-compute running goal/assist/moment season totals (games are already in chronological order)
 const _goalRunning = {};
 const _assistRunning = {};
+const _momentRunning = {};
 games.forEach(g => {
-  if (!g.dkGoals) return;
-  g.dkGoals.forEach(goal => {
-    _goalRunning[goal.scorer] = (_goalRunning[goal.scorer] || 0) + 1;
-    goal._goalTotal = _goalRunning[goal.scorer];
-    goal._assistTotals = {};
-    (goal.assists || []).forEach(a => {
-      _assistRunning[a] = (_assistRunning[a] || 0) + 1;
-      goal._assistTotals[a] = _assistRunning[a];
+  if (g.dkGoals) {
+    g.dkGoals.forEach(goal => {
+      _goalRunning[goal.scorer] = (_goalRunning[goal.scorer] || 0) + 1;
+      goal._goalTotal = _goalRunning[goal.scorer];
+      goal._assistTotals = {};
+      (goal.assists || []).forEach(a => {
+        _assistRunning[a] = (_assistRunning[a] || 0) + 1;
+        goal._assistTotals[a] = _assistRunning[a];
+      });
     });
-  });
+  }
+  if (g.customMoments) {
+    g.customMoments.forEach(moment => {
+      _momentRunning[moment.player] = (_momentRunning[moment.player] || 0) + 1;
+      moment._momentTotal = _momentRunning[moment.player];
+    });
+  }
 });
 
 const schedule = document.getElementById('schedule');
@@ -2377,7 +2385,7 @@ function buildMomentLineHtml(moment) {
     : '';
   return `<div class="moment-line">
     <div class="goal-meta"><span class="goal-time">${moment.time}</span><span class="goal-meta-end"><span class="moment-badge">Moment</span></span></div>
-    <div class="goal-scorer">${displayPlayerName(moment.player)}</div>
+    <div class="goal-scorer">${displayPlayerName(moment.player)} <span class="running-total">(${moment._momentTotal})</span></div>
     <div class="moment-desc">${moment.description}</div>
     ${clipHtml}
   </div>`;
