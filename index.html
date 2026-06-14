@@ -537,6 +537,46 @@
     padding: 4px 0 8px;
   }
 
+  .moment-line {
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--text);
+    padding: 8px 0 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .moment-line:last-child {
+    border-bottom: none;
+  }
+
+  .moment-badge {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9ec8e8;
+    border: 1px solid rgba(158, 200, 232, 0.35);
+    border-radius: 3px;
+    padding: 1px 6px;
+    background: rgba(158, 200, 232, 0.08);
+  }
+
+  .moment-desc {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .moment-clip {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #000;
+  }
+
   .box-score-summary {
     margin: 10px 0 14px;
     padding-bottom: 12px;
@@ -1972,6 +2012,15 @@ const games = [
         scoreAtTime: "Buc 9, Sta 0"
       }
     ],
+    customMoments: [
+      {
+        period: "1st",
+        time: "00:45",
+        player: "Lindsey Utter",
+        description: "Receipt of a long backhand pass",
+        clip: "assets/clips/utter-backhand-pass.mp4"
+      }
+    ],
     score: {
       dk: 9,
       opp: 0
@@ -2240,6 +2289,74 @@ function buildBoxScoreSummaryHtml(g) {
   </div>`;
 }
 
+function hockeyTimeSeconds(time) {
+  const parts = String(time).split(':').map(Number);
+  return (parts[0] || 0) * 60 + (parts[1] || 0);
+}
+
+function buildPeriodTimeline(g) {
+  const periods = {};
+  for (const goal of g.dkGoals || []) {
+    if (!periods[goal.period]) periods[goal.period] = [];
+    periods[goal.period].push({ kind: 'goal', time: goal.time, goal });
+  }
+  for (const moment of g.customMoments || []) {
+    if (!periods[moment.period]) periods[moment.period] = [];
+    periods[moment.period].push({ kind: 'moment', time: moment.time, moment });
+  }
+  for (const period of Object.keys(periods)) {
+    periods[period].sort((a, b) => hockeyTimeSeconds(b.time) - hockeyTimeSeconds(a.time));
+  }
+  return periods;
+}
+
+function buildGoalLineHtml(g, goal) {
+  const badges = (goal.badges && goal.badges.length)
+    ? `<span class="badges">${goal.badges.map((b) => `[${b}]`).join(' ')}</span>`
+    : '';
+  let scoreHtml = '';
+  if (goal.scoreAtTime) {
+    const jerseySrc = g.ha === 'home' ? 'assets/darkjersey.png' : 'assets/whitejersey.png';
+    const jerseyAlt = g.ha === 'home' ? 'Dark Knights (Home)' : 'Dark Knights (Away)';
+    const { dkNum, oppNum } = parseScoreAtTime(goal.scoreAtTime, g);
+    const dkDisplay = dkNum ?? '?';
+    const oppLabel = `${opponentShortName(g)} ${oppNum ?? '?'}`;
+    scoreHtml = `<span class="goal-score"><img src="${jerseySrc}" alt="${jerseyAlt}" class="score-jersey"> ${dkDisplay} <span class="score-sep">•</span> ${oppLabel}</span>`;
+  }
+  const assistStr = assistPhraseWithTotals(goal.assists, goal._assistTotals);
+  const metaEnd = `${badges}${scoreHtml}`;
+  const metaEndHtml = metaEnd
+    ? `<span class="goal-meta-end">${metaEnd}</span>`
+    : '';
+  return `<div class="goal-line">
+    <div class="goal-meta"><span class="goal-time">${goal.time}</span>${metaEndHtml}</div>
+    <div class="goal-scorer">${displayPlayerName(goal.scorer)} <span class="running-total">(${goal._goalTotal})</span></div>
+    <div class="goal-assist">${assistStr !== null ? `${goal.assists.length === 1 ? 'Assist:' : 'Assists:'} ${assistStr}` : 'Unassisted'}</div>
+  </div>`;
+}
+
+function buildMomentLineHtml(moment) {
+  const clipHtml = moment.clip
+    ? `<video class="moment-clip" src="${moment.clip}" autoplay loop muted playsinline preload="metadata" aria-label="${moment.description}"></video>`
+    : '';
+  return `<div class="moment-line">
+    <div class="goal-meta"><span class="goal-time">${moment.time}</span><span class="goal-meta-end"><span class="moment-badge">Moment</span></span></div>
+    <div class="goal-scorer">${displayPlayerName(moment.player)}</div>
+    <div class="moment-desc">${moment.description}</div>
+    ${clipHtml}
+  </div>`;
+}
+
+function setMomentClipsPlaying(panel, playing) {
+  panel.querySelectorAll('video.moment-clip').forEach((video) => {
+    if (playing) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  });
+}
+
 function buildGoalsPanel(g) {
   const panel = document.createElement('div');
   panel.className = 'game-goals-panel';
@@ -2247,55 +2364,35 @@ function buildGoalsPanel(g) {
   panel.setAttribute('role', 'region');
   let html = buildBoxScoreSummaryHtml(g);
 
-  if (!g.dkGoals || g.dkGoals.length === 0) {
+  const hasGoals = g.dkGoals && g.dkGoals.length > 0;
+  const hasMoments = g.customMoments && g.customMoments.length > 0;
+  if (!hasGoals && !hasMoments) {
     panel.innerHTML = html + '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
     return panel;
   }
 
-  const periods = {};
-  for (const goal of g.dkGoals) {
-    if (!periods[goal.period]) periods[goal.period] = [];
-    periods[goal.period].push(goal);
-  }
-  
-  if (html) html += goalsSectionHeading();
+  const periods = buildPeriodTimeline(g);
+
+  if (html) html += goalsSectionHeading(g);
 
   for (const period of ["1st", "2nd", "3rd", "OT", "SO"]) {
     if (!periods[period]) continue;
     html += `<div class="period-header">${period} Period</div>`;
-    for (const goal of periods[period]) {
-      const badges = (goal.badges && goal.badges.length)
-        ? `<span class="badges">${goal.badges.map((b) => `[${b}]`).join(' ')}</span>`
-        : '';
-      let scoreHtml = '';
-      if (goal.scoreAtTime) {
-        const jerseySrc = g.ha === 'home' ? 'assets/darkjersey.png' : 'assets/whitejersey.png';
-        const jerseyAlt = g.ha === 'home' ? 'Dark Knights (Home)' : 'Dark Knights (Away)';
-        const { dkNum, oppNum } = parseScoreAtTime(goal.scoreAtTime, g);
-        const dkDisplay = dkNum ?? '?';
-        const oppLabel = `${opponentShortName(g)} ${oppNum ?? '?'}`;
-        scoreHtml = `<span class="goal-score"><img src="${jerseySrc}" alt="${jerseyAlt}" class="score-jersey"> ${dkDisplay} <span class="score-sep">•</span> ${oppLabel}</span>`;
-      }
-      const assistStr = assistPhraseWithTotals(goal.assists, goal._assistTotals);
-      const metaEnd = `${badges}${scoreHtml}`;
-      const metaEndHtml = metaEnd
-        ? `<span class="goal-meta-end">${metaEnd}</span>`
-        : '';
-      html += `<div class="goal-line">
-        <div class="goal-meta"><span class="goal-time">${goal.time}</span>${metaEndHtml}</div>
-        <div class="goal-scorer">${displayPlayerName(goal.scorer)} <span class="running-total">(${goal._goalTotal})</span></div>
-        <div class="goal-assist">${assistStr !== null ? `${goal.assists.length === 1 ? 'Assist:' : 'Assists:'} ${assistStr}` : 'Unassisted'}</div>
-      </div>`;
+    for (const event of periods[period]) {
+      html += event.kind === 'goal'
+        ? buildGoalLineHtml(g, event.goal)
+        : buildMomentLineHtml(event.moment);
     }
   }
-  
+
   panel.innerHTML = html;
   return panel;
 }
 
 // Goals section heading when goal list follows box score summary
-function goalsSectionHeading() {
-  return '<h4>Dark Knights Goals</h4>';
+function goalsSectionHeading(g) {
+  const hasMoments = g.customMoments && g.customMoments.length > 0;
+  return `<h4>${hasMoments ? 'Scoring & Highlights' : 'Dark Knights Goals'}</h4>`;
 }
 
 games.forEach((g, i) => {
@@ -2363,6 +2460,7 @@ games.forEach((g, i) => {
       const open = !wrap.classList.contains('expanded');
       wrap.classList.toggle('expanded', open);
       panel.classList.toggle('open', open);
+      setMomentClipsPlaying(panel, open);
       card.setAttribute('aria-expanded', open ? 'true' : 'false');
       if (!open) card.blur();
     });
