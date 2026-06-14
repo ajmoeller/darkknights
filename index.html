@@ -2086,6 +2086,14 @@ const games = [
     ],
     customMoments: [
       {
+        id: "cutting-pregame",
+        period: "Pregame",
+        time: "Pregame",
+        player: "Xavier Cutting",
+        description: "Spin Cycle",
+        clip: "assets/clips/cutting-pregame.mp4"
+      },
+      {
         id: "utter-backhand-pass",
         period: "1st",
         time: "00:45",
@@ -2375,7 +2383,9 @@ function buildBoxScoreSummaryHtml(g) {
 }
 
 function hockeyTimeSeconds(time) {
-  const parts = String(time).split(':').map(Number);
+  const t = String(time);
+  if (t.toLowerCase() === 'pregame') return Number.POSITIVE_INFINITY;
+  const parts = t.split(':').map(Number);
   return (parts[0] || 0) * 60 + (parts[1] || 0);
 }
 
@@ -2461,9 +2471,9 @@ function buildGoalsPanel(g) {
 
   if (html) html += goalsSectionHeading(g);
 
-  for (const period of ["1st", "2nd", "3rd", "OT", "SO"]) {
+  for (const period of ["Pregame", "1st", "2nd", "3rd", "OT", "SO"]) {
     if (!periods[period]) continue;
-    html += `<div class="period-header">${period} Period</div>`;
+    html += `<div class="period-header">${period === 'Pregame' ? 'Pregame' : `${period} Period`}</div>`;
     for (const event of periods[period]) {
       html += event.kind === 'goal'
         ? buildGoalLineHtml(g, event.goal)
