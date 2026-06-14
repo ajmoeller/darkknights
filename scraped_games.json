@@ -761,7 +761,7 @@
             1
           ],
           "total": 6,
-          "sog": "29 (11-10-8)",
+          "sog": "29 (12-12-5)",
           "pp": "0/1",
           "pim": 2,
           "isDarkKnights": true
@@ -823,10 +823,141 @@
         "time": "13:58",
         "scorer": "Andrew Litten",
         "assists": [
+          "Aidan Atkins",
           "Anders Madsen"
         ],
         "badges": [],
         "scoreAtTime": "Sta 0, Buc 6"
+      }
+    ]
+  },
+  "2516455": {
+    "date": "2026-06-14",
+    "gameId": "2516455",
+    "boxScore": {
+      "teams": [
+        {
+          "teamId": "672741",
+          "name": "Buccaneers Dark Knights",
+          "periods": [
+            4,
+            2,
+            3
+          ],
+          "total": 9,
+          "sog": "33 (15-8-10)",
+          "pp": "1/2",
+          "pim": 12,
+          "isDarkKnights": true
+        },
+        {
+          "teamId": "672722",
+          "name": "Stars Drop Bears Div 2",
+          "periods": [
+            0,
+            0,
+            0
+          ],
+          "total": 0,
+          "sog": "27 (10-11-6)",
+          "pp": "0/5",
+          "pim": 6,
+          "isDarkKnights": false
+        }
+      ]
+    },
+    "dkGoals": [
+      {
+        "period": "1st",
+        "time": "12:37",
+        "scorer": "Calen French",
+        "assists": [],
+        "badges": [],
+        "scoreAtTime": "Buc 1, Sta 0"
+      },
+      {
+        "period": "1st",
+        "time": "11:31",
+        "scorer": "Aaron Moeller",
+        "assists": [
+          "Jonah Hicks"
+        ],
+        "badges": [],
+        "scoreAtTime": "Buc 2, Sta 0"
+      },
+      {
+        "period": "1st",
+        "time": "9:10",
+        "scorer": "Andrew Litten",
+        "assists": [
+          "Connor MacKenzie"
+        ],
+        "badges": [],
+        "scoreAtTime": "Buc 3, Sta 0"
+      },
+      {
+        "period": "1st",
+        "time": "2:08",
+        "scorer": "Aidan Atkins",
+        "assists": [
+          "Jonah Hicks"
+        ],
+        "badges": [],
+        "scoreAtTime": "Buc 4, Sta 0"
+      },
+      {
+        "period": "2nd",
+        "time": "16:57",
+        "scorer": "Andrew Litten",
+        "assists": [
+          "Connor MacKenzie"
+        ],
+        "badges": [],
+        "scoreAtTime": "Buc 5, Sta 0"
+      },
+      {
+        "period": "2nd",
+        "time": "0:06",
+        "scorer": "Andrew Litten",
+        "assists": [
+          "Connor MacKenzie"
+        ],
+        "badges": [],
+        "scoreAtTime": "Buc 6, Sta 0"
+      },
+      {
+        "period": "3rd",
+        "time": "7:46",
+        "scorer": "Aaron Moeller",
+        "assists": [
+          "Connor MacKenzie"
+        ],
+        "badges": [
+          "PPG"
+        ],
+        "scoreAtTime": "Buc 7, Sta 0"
+      },
+      {
+        "period": "3rd",
+        "time": "4:18",
+        "scorer": "James Gillitt",
+        "assists": [
+          "Calen French",
+          "Taku Ide"
+        ],
+        "badges": [],
+        "scoreAtTime": "Buc 8, Sta 0"
+      },
+      {
+        "period": "3rd",
+        "time": "2:00",
+        "scorer": "Connor MacKenzie",
+        "assists": [
+          "Andrew Litten",
+          "Grace Kalambokas"
+        ],
+        "badges": [],
+        "scoreAtTime": "Buc 9, Sta 0"
       }
     ]
   }
