@@ -549,6 +549,17 @@
     color: var(--text);
     padding: 8px 0 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    scroll-margin-top: 48px;
+    scroll-margin-bottom: 24px;
+  }
+
+  .moment-line.moment-highlight {
+    animation: momentFlash 1.6s ease;
+  }
+
+  @keyframes momentFlash {
+    0%, 100% { background: transparent; }
+    20%, 60% { background: rgba(200, 170, 90, 0.1); }
   }
 
   .moment-line:last-child {
@@ -564,6 +575,31 @@
     border-radius: 3px;
     padding: 1px 6px;
     background: rgba(158, 200, 232, 0.08);
+  }
+
+  .moment-share-btn {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    opacity: 0.35;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: opacity 0.15s, color 0.15s;
+  }
+
+  .moment-share-btn:hover,
+  .moment-share-btn:focus-visible {
+    opacity: 0.85;
+    color: var(--accent);
+  }
+
+  .moment-share-btn.copied {
+    opacity: 0.75;
+    color: var(--accent);
   }
 
   .moment-desc {
@@ -2050,6 +2086,7 @@ const games = [
     ],
     customMoments: [
       {
+        id: "utter-backhand-pass",
         period: "1st",
         time: "00:45",
         player: "Lindsey Utter",
@@ -2202,7 +2239,11 @@ games.forEach(g => {
     });
   }
   if (g.customMoments) {
-    g.customMoments.forEach(moment => {
+    g.customMoments.forEach((moment, i) => {
+      if (!moment.id) {
+        moment.id = `${moment.period}-${String(moment.time).replace(':', '')}-${i}`;
+      }
+      moment._momentId = moment.id;
       _momentRunning[moment.player] = (_momentRunning[moment.player] || 0) + 1;
       moment._momentTotal = _momentRunning[moment.player];
     });
@@ -2379,12 +2420,13 @@ function buildGoalLineHtml(g, goal) {
   </div>`;
 }
 
-function buildMomentLineHtml(moment) {
+function buildMomentLineHtml(g, moment) {
   const clipHtml = moment.clip
     ? `<video class="moment-clip" src="${moment.clip}" autoplay loop muted playsinline preload="metadata" aria-label="${moment.description}"></video>`
     : '';
-  return `<div class="moment-line">
-    <div class="goal-meta"><span class="goal-time">${moment.time}</span><span class="goal-meta-end"><span class="moment-badge">Moment</span></span></div>
+  const shareBtn = `<button type="button" class="moment-share-btn" data-moment-id="${moment._momentId}" aria-label="Share this moment" title="Share moment"><svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M6.2 9.1a2.6 2.6 0 0 0 3.7 0l1.5-1.5a2.6 2.6 0 0 0-3.7-3.7L6.7 4.4M9.8 6.9a2.6 2.6 0 0 0-3.7 0L4.6 8.4a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg></button>`;
+  return `<div class="moment-line" id="moment-${moment._momentId}">
+    <div class="goal-meta"><span class="goal-time">${moment.time}</span><span class="goal-meta-end"><span class="moment-badge">Moment</span>${shareBtn}</span></div>
     <div class="goal-scorer">${displayPlayerName(moment.player)} <span class="running-total">(${moment._momentTotal})</span></div>
     <div class="moment-desc">${moment.description}</div>
     ${clipHtml}
@@ -2425,11 +2467,12 @@ function buildGoalsPanel(g) {
     for (const event of periods[period]) {
       html += event.kind === 'goal'
         ? buildGoalLineHtml(g, event.goal)
-        : buildMomentLineHtml(event.moment);
+        : buildMomentLineHtml(g, event.moment);
     }
   }
 
   panel.innerHTML = html;
+  attachMomentShareButtons(panel, g);
   return panel;
 }
 
@@ -2444,12 +2487,60 @@ function gameShareUrl(date) {
   return `${base}?game=${date}#game-${date}`;
 }
 
+function momentShareUrl(date, momentId) {
+  const base = `${location.origin}${location.pathname}`;
+  return `${base}?game=${date}&moment=${momentId}#moment-${momentId}`;
+}
+
 function getSharedGameDate() {
   const params = new URLSearchParams(location.search);
   const fromQuery = params.get('game');
   if (fromQuery && /^\d{4}-\d{2}-\d{2}$/.test(fromQuery)) return fromQuery;
   const match = location.hash.match(/game-(\d{4}-\d{2}-\d{2})/);
   return match ? match[1] : null;
+}
+
+function getSharedMomentId() {
+  const params = new URLSearchParams(location.search);
+  const fromQuery = params.get('moment');
+  if (fromQuery && /^[a-z0-9-]+$/i.test(fromQuery)) return fromQuery;
+  const match = location.hash.match(/moment-([a-z0-9-]+)/i);
+  return match ? match[1] : null;
+}
+
+function findGameDateForMoment(momentId) {
+  const game = games.find((g) =>
+    (g.customMoments || []).some((m) => m._momentId === momentId || m.id === momentId)
+  );
+  return game?.date || null;
+}
+
+function attachMomentShareButtons(panel, g) {
+  panel.querySelectorAll('.moment-share-btn').forEach((btn) => {
+    const momentId = btn.dataset.momentId;
+    const moment = (g.customMoments || []).find((m) => m._momentId === momentId);
+    if (!moment) return;
+    btn.addEventListener('click', (e) => shareMoment(e, g, moment, btn));
+  });
+}
+
+async function copyOrShare(url, title, text, btn) {
+  try {
+    if (navigator.share) {
+      await navigator.share({ title, text, url });
+    } else {
+      await navigator.clipboard.writeText(url);
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 1500);
+    }
+  } catch (err) {
+    if (err?.name === 'AbortError') return;
+    try {
+      await navigator.clipboard.writeText(url);
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 1500);
+    } catch (_) {}
+  }
 }
 
 function createGameShareButton(g) {
@@ -2471,25 +2562,26 @@ async function shareGame(e, g, btn) {
   const text = g.score
     ? `${g.month} ${g.dayNum} — Final ${g.score.dk}-${g.score.opp}`
     : `${g.month} ${g.dayNum} — ${g.start}, ${g.venue}`;
-  try {
-    if (navigator.share) {
-      await navigator.share({ title, text, url });
-    } else {
-      await navigator.clipboard.writeText(url);
-      btn.classList.add('copied');
-      setTimeout(() => btn.classList.remove('copied'), 1500);
-    }
-  } catch (err) {
-    if (err?.name === 'AbortError') return;
-    try {
-      await navigator.clipboard.writeText(url);
-      btn.classList.add('copied');
-      setTimeout(() => btn.classList.remove('copied'), 1500);
-    } catch (_) {}
-  }
+  await copyOrShare(url, title, text, btn);
 }
 
-function openSharedGame(date, { scroll = true } = {}) {
+async function shareMoment(e, g, moment, btn) {
+  e.stopPropagation();
+  e.preventDefault();
+  const url = momentShareUrl(g.date, moment._momentId);
+  const title = `${displayPlayerName(moment.player)} — Dark Knights vs ${g.opp}`;
+  const text = `${g.month} ${g.dayNum}, ${moment.period} ${moment.time} — ${moment.description}`;
+  await copyOrShare(url, title, text, btn);
+}
+
+function highlightSharedMoment(momentId) {
+  const el = document.getElementById(`moment-${momentId}`);
+  if (!el) return;
+  el.classList.add('moment-highlight');
+  setTimeout(() => el.classList.remove('moment-highlight'), 1600);
+}
+
+function openSharedGame(date, { scroll = true, momentId = null } = {}) {
   const wrap = document.getElementById(`game-${date}`);
   if (!wrap) return false;
 
@@ -2507,10 +2599,13 @@ function openSharedGame(date, { scroll = true } = {}) {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        wrap.scrollIntoView({
+        const momentEl = momentId ? document.getElementById(`moment-${momentId}`) : null;
+        const target = momentEl || wrap;
+        target.scrollIntoView({
           behavior: reducedMotion ? 'auto' : 'smooth',
-          block: 'start',
+          block: momentEl ? 'center' : 'start',
         });
+        if (momentEl) highlightSharedMoment(momentId);
       });
     });
   }
@@ -2519,11 +2614,13 @@ function openSharedGame(date, { scroll = true } = {}) {
 }
 
 function initSharedGameLink() {
-  const date = getSharedGameDate();
+  const momentId = getSharedMomentId();
+  let date = getSharedGameDate();
+  if (!date && momentId) date = findGameDateForMoment(momentId);
   if (!date) return;
 
   const tryOpen = (attempt = 0) => {
-    if (openSharedGame(date)) return;
+    if (openSharedGame(date, { momentId })) return;
     if (attempt < 20) setTimeout(() => tryOpen(attempt + 1), 50);
   };
 
@@ -2652,7 +2749,7 @@ games.forEach((g, i) => {
 });
 
 function scrollToNextGame() {
-  if (getSharedGameDate()) return;
+  if (getSharedGameDate() || getSharedMomentId()) return;
   if (nextGameIdx === -1) return;
   const el = document.querySelector('.game-card.next-game')?.closest('.game-wrap');
   if (!el) return;
@@ -2672,7 +2769,7 @@ function scrollToNextGame() {
   }, introDelay);
 }
 
-if (getSharedGameDate()) {
+if (getSharedGameDate() || getSharedMomentId()) {
   initSharedGameLink();
 } else {
   requestAnimationFrame(() => requestAnimationFrame(scrollToNextGame));
