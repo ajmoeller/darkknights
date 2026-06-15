@@ -2599,6 +2599,23 @@ function highlightSharedMoment(momentId) {
   setTimeout(() => el.classList.remove('moment-highlight'), 1600);
 }
 
+function scrollToSharedTarget(date, momentId) {
+  const wrap = document.getElementById(`game-${date}`);
+  if (!wrap) return false;
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const momentEl = momentId ? document.getElementById(`moment-${momentId}`) : null;
+  const target = momentEl || wrap;
+
+  target.scrollIntoView({
+    behavior: reducedMotion ? 'auto' : 'smooth',
+    block: momentEl ? 'center' : 'start',
+  });
+
+  if (momentEl) highlightSharedMoment(momentId);
+  return !!momentEl;
+}
+
 function openSharedGame(date, { scroll = true, momentId = null } = {}) {
   const wrap = document.getElementById(`game-${date}`);
   if (!wrap) return false;
@@ -2614,17 +2631,14 @@ function openSharedGame(date, { scroll = true, momentId = null } = {}) {
   }
 
   if (scroll) {
+    const runScroll = (attempt = 0) => {
+      const scrolledToMoment = scrollToSharedTarget(date, momentId);
+      if (!momentId || scrolledToMoment || attempt >= 4) return;
+      setTimeout(() => runScroll(attempt + 1), 80);
+    };
+
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const momentEl = momentId ? document.getElementById(`moment-${momentId}`) : null;
-        const target = momentEl || wrap;
-        target.scrollIntoView({
-          behavior: reducedMotion ? 'auto' : 'smooth',
-          block: momentEl ? 'center' : 'start',
-        });
-        if (momentEl) highlightSharedMoment(momentId);
-      });
+      requestAnimationFrame(() => runScroll());
     });
   }
 
