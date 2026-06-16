@@ -1475,6 +1475,16 @@ const games = [
         scoreAtTime: "Buc 2, Sta 2"
       }
     ],
+    customMoments: [
+      {
+        id: "litten-puckers-photo",
+        period: "3rd",
+        time: "0:30",
+        player: "Andrew Litten",
+        photo: "assets/photos/andrew-litten-puckers-1.jpg",
+        description: "Andrew Litten in the thick of it against the Puckers."
+      }
+    ],
     gameId: "2516415",
     boxScore: {
       teams: [
@@ -2666,8 +2676,11 @@ function buildGoalLineHtml(g, goal) {
 }
 
 function buildMomentLineHtml(g, moment, { attached = false } = {}) {
-  const expandBtn = `<button type="button" class="moment-expand-btn" aria-expanded="false" aria-label="Expand video" title="Expand video"><svg class="moment-expand-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M2.5 5.5V2.5h3M13.5 5.5V2.5h-3M2.5 10.5v3h3M13.5 10.5v3h-3"/></svg><svg class="moment-collapse-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M5.5 2.5H2.5v3M10.5 2.5h3v3M5.5 13.5H2.5v-3M10.5 13.5h3v-3"/></svg></button>`;
-  const clipHtml = moment.clip
+  const mediaWord = moment.photo ? 'photo' : 'video';
+  const expandBtn = `<button type="button" class="moment-expand-btn" aria-expanded="false" aria-label="Expand ${mediaWord}" title="Expand ${mediaWord}"><svg class="moment-expand-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M2.5 5.5V2.5h3M13.5 5.5V2.5h-3M2.5 10.5v3h3M13.5 10.5v3h-3"/></svg><svg class="moment-collapse-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M5.5 2.5H2.5v3M10.5 2.5h3v3M5.5 13.5H2.5v-3M10.5 13.5h3v-3"/></svg></button>`;
+  const clipHtml = moment.photo
+    ? `<div class="moment-clip-wrap"><img class="moment-clip moment-photo" data-src="${moment.photo}" alt="${moment.description || 'Moment photo'}">${expandBtn}</div>`
+    : moment.clip
     ? `<div class="moment-clip-wrap"><video class="moment-clip" src="${moment.clip}" loop muted playsinline preload="none" aria-label="${moment.description || 'Moment highlight'}"></video>${expandBtn}</div>`
     : '';
   const shareBtn = `<button type="button" class="moment-share-btn" data-moment-id="${moment._momentId}" aria-label="Share this moment" title="Share moment"><svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M6.2 9.1a2.6 2.6 0 0 0 3.7 0l1.5-1.5a2.6 2.6 0 0 0-3.7-3.7L6.7 4.4M9.8 6.9a2.6 2.6 0 0 0-3.7 0L4.6 8.4a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg></button>`;
@@ -2749,6 +2762,13 @@ const momentClipObserver = ('IntersectionObserver' in window)
   : null;
 
 function setMomentClipsPlaying(panel, playing) {
+  if (playing) {
+    // Photos are tiny; load them as soon as the game is opened.
+    panel.querySelectorAll('img.moment-photo[data-src]').forEach((img) => {
+      img.src = img.dataset.src;
+      img.removeAttribute('data-src');
+    });
+  }
   panel.querySelectorAll('video.moment-clip').forEach((video) => {
     if (playing) {
       if (momentClipObserver) momentClipObserver.observe(video);
@@ -2804,14 +2824,26 @@ function goalsSectionHeading(g) {
   return `<h4>${hasMoments ? 'Scoring & Highlights' : 'Dark Knights Goals'}</h4>`;
 }
 
+const SITE_SHARE_ORIGIN = 'https://darkknights.com.au';
+
+function shareBaseUrl() {
+  if (location.protocol === 'file:' || location.protocol === 'blob:') {
+    return SITE_SHARE_ORIGIN;
+  }
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return SITE_SHARE_ORIGIN;
+  }
+  return location.origin;
+}
+
 function gameShareUrl(date) {
-  const base = `${location.origin}${location.pathname}`;
-  return `${base}?game=${date}#game-${date}`;
+  const base = shareBaseUrl();
+  return `${base}/?game=${date}#game-${date}`;
 }
 
 function momentShareUrl(date, momentId) {
-  const base = `${location.origin}${location.pathname}`;
-  return `${base}?game=${date}&moment=${momentId}#moment-${momentId}`;
+  const base = shareBaseUrl();
+  return `${base}/?game=${date}&moment=${momentId}#moment-${momentId}`;
 }
 
 function getSharedGameDate() {
@@ -2854,7 +2886,8 @@ function attachMomentExpandButtons(panel) {
       if (!wrap) return;
       const expanded = wrap.classList.toggle('expanded');
       btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      const label = expanded ? 'Collapse video' : 'Expand video';
+      const mediaWord = wrap.querySelector('img') ? 'photo' : 'video';
+      const label = `${expanded ? 'Collapse' : 'Expand'} ${mediaWord}`;
       btn.setAttribute('aria-label', label);
       btn.title = label;
     });
