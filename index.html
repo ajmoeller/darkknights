@@ -629,6 +629,30 @@
     padding-top: 4px;
   }
 
+  .moment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .moment-header-start {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .moment-header-start .goal-time {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
   .moment-badge {
     font-size: 0.62rem;
     letter-spacing: 0.12em;
@@ -2896,11 +2920,13 @@ function buildMomentLineHtml(g, moment, { attached = false } = {}) {
   const shareBtn = `<button type="button" class="moment-share-btn" data-moment-id="${moment._momentId}" aria-label="Share this moment" title="Share moment"><svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M6.2 9.1a2.6 2.6 0 0 0 3.7 0l1.5-1.5a2.6 2.6 0 0 0-3.7-3.7L6.7 4.4M9.8 6.9a2.6 2.6 0 0 0-3.7 0L4.6 8.4a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg></button>`;
   const timeHtml = (attached || !moment.time) ? '' : `<span class="goal-time">${moment.time}</span>`;
   const attachedClass = attached ? ' moment-attached' : (moment.afterPeriod ? ' moment-after-period' : '');
-  const playerHtml = attached ? '' : `<div class="goal-scorer">${displayPlayerName(moment.player)} <span class="running-total">(${moment._momentTotal})</span></div>`;
+  const playerHtml = attached ? '' : `<span class="goal-scorer">${displayPlayerName(moment.player)} <span class="running-total">(${moment._momentTotal})</span></span>`;
+  const headerHtml = attached
+    ? `<div class="goal-meta">${timeHtml}<span class="goal-meta-end"><span class="moment-badge">Moment</span>${shareBtn}</span></div>`
+    : `<div class="moment-header"><div class="moment-header-start">${timeHtml}${playerHtml}</div><span class="goal-meta-end"><span class="moment-badge">Moment</span>${shareBtn}</span></div>`;
   const descHtml = moment.description ? `<div class="moment-desc">${moment.description}</div>` : '';
   return `<div class="moment-line${attachedClass}" id="moment-${moment._momentId}">
-    <div class="goal-meta">${timeHtml}<span class="goal-meta-end"><span class="moment-badge">Moment</span>${shareBtn}</span></div>
-    ${playerHtml}
+    ${headerHtml}
     ${descHtml}
     ${clipHtml}
   </div>`;
