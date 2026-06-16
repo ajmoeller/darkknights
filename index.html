@@ -397,6 +397,33 @@
     line-height: 1.1;
   }
 
+  .game-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .game-moments-tag {
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #b8e4ff;
+    border: 1px solid rgba(120, 200, 255, 0.55);
+    border-radius: 999px;
+    padding: 2px 8px;
+    background: linear-gradient(135deg, rgba(80, 170, 255, 0.22), rgba(120, 200, 255, 0.1));
+    box-shadow: 0 0 10px rgba(100, 190, 255, 0.22);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .game-card.has-goals-toggle:hover .game-moments-tag,
+  .game-card.has-goals-toggle:focus-visible .game-moments-tag {
+    border-color: rgba(160, 220, 255, 0.75);
+    box-shadow: 0 0 14px rgba(120, 200, 255, 0.35);
+  }
+
   .game-toggle-hint .chevron {
     font-size: 0.48rem;
     color: var(--accent);
@@ -2485,6 +2512,22 @@ function hockeyTimeSeconds(time) {
   return (parts[0] || 0) * 60 + (parts[1] || 0);
 }
 
+function countGameMoments(g) {
+  return (g.customMoments || []).length;
+}
+
+function gameMomentsTagHtml(g) {
+  const count = countGameMoments(g);
+  if (!count) return '';
+  const label = count === 1 ? '1 Moment' : `${count} Moments`;
+  return `<span class="game-moments-tag">${label}</span>`;
+}
+
+function buildGameToggleHint(g) {
+  const momentsTag = gameMomentsTagHtml(g);
+  return `<div class="game-toggle-hint"><span class="game-toggle-label"><span>Goals</span>${momentsTag}</span><span class="chevron" aria-hidden="true">▼</span></div>`;
+}
+
 function goalEventKey(period, time) {
   return `${period}-${time}`;
 }
@@ -2834,16 +2877,18 @@ games.forEach((g, i) => {
     `;
   }
 
-  const toggleHint = g.score
-    ? `<div class="game-toggle-hint"><span>Goals</span><span class="chevron" aria-hidden="true">▼</span></div>`
-    : '';
+  const toggleHint = g.score ? buildGameToggleHint(g) : '';
 
   if (toggleHint) {
     card.classList.add('has-goals-toggle');
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
     card.setAttribute('aria-expanded', 'false');
-    card.setAttribute('aria-label', `Show goals: ${g.month} ${g.dayNum} vs ${g.opp}`);
+    const momentCount = countGameMoments(g);
+    const ariaDetail = momentCount
+      ? `Show goals and ${momentCount} moment${momentCount === 1 ? '' : 's'}`
+      : 'Show goals';
+    card.setAttribute('aria-label', `${ariaDetail}: ${g.month} ${g.dayNum} vs ${g.opp}`);
     const panel = buildGoalsPanel(g);
     card.setAttribute('aria-controls', panel.id);
 
