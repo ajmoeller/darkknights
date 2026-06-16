@@ -606,6 +606,17 @@
     border-bottom: none;
   }
 
+  .period-break {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  }
+
+  .period-break .moment-line {
+    border-bottom: none;
+    padding-top: 4px;
+  }
+
   .moment-badge {
     font-size: 0.62rem;
     letter-spacing: 0.12em;
@@ -1478,11 +1489,9 @@ const games = [
     customMoments: [
       {
         id: "litten-puckers-photo",
-        period: "3rd",
-        time: "0:30",
+        afterPeriod: "3rd",
         player: "Andrew Litten",
-        photo: "assets/photos/andrew-litten-puckers-1.jpg",
-        description: "Andrew Litten in the thick of it against the Puckers."
+        photo: "assets/photos/andrew-litten-puckers-1.jpg"
       }
     ],
     gameId: "2516415",
@@ -2636,7 +2645,7 @@ function buildPeriodTimeline(g) {
     periods[goal.period].push({ kind: 'goal', time: goal.time, goal });
   }
   for (const moment of g.customMoments || []) {
-    if (moment.attachedToGoal) continue;
+    if (moment.attachedToGoal || moment.afterPeriod) continue;
     if (!periods[moment.period]) periods[moment.period] = [];
     periods[moment.period].push({ kind: 'moment', time: moment.time, moment });
   }
@@ -2684,8 +2693,8 @@ function buildMomentLineHtml(g, moment, { attached = false } = {}) {
     ? `<div class="moment-clip-wrap"><video class="moment-clip" src="${moment.clip}" loop muted playsinline preload="none" aria-label="${moment.description || 'Moment highlight'}"></video>${expandBtn}</div>`
     : '';
   const shareBtn = `<button type="button" class="moment-share-btn" data-moment-id="${moment._momentId}" aria-label="Share this moment" title="Share moment"><svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M6.2 9.1a2.6 2.6 0 0 0 3.7 0l1.5-1.5a2.6 2.6 0 0 0-3.7-3.7L6.7 4.4M9.8 6.9a2.6 2.6 0 0 0-3.7 0L4.6 8.4a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg></button>`;
-  const timeHtml = attached ? '' : `<span class="goal-time">${moment.time}</span>`;
-  const attachedClass = attached ? ' moment-attached' : '';
+  const timeHtml = (attached || !moment.time) ? '' : `<span class="goal-time">${moment.time}</span>`;
+  const attachedClass = attached ? ' moment-attached' : (moment.afterPeriod ? ' moment-after-period' : '');
   const playerHtml = attached ? '' : `<div class="goal-scorer">${displayPlayerName(moment.player)} <span class="running-total">(${moment._momentTotal})</span></div>`;
   const descHtml = moment.description ? `<div class="moment-desc">${moment.description}</div>` : '';
   return `<div class="moment-line${attachedClass}" id="moment-${moment._momentId}">
@@ -2809,6 +2818,14 @@ function buildGoalsPanel(g) {
       html += event.kind === 'goal'
         ? buildGoalLineHtml(g, event.goal)
         : buildMomentLineHtml(g, event.moment);
+    }
+    const afterPeriodMoments = (g.customMoments || []).filter((m) => m.afterPeriod === period);
+    if (afterPeriodMoments.length) {
+      html += '<div class="period-break">';
+      for (const moment of afterPeriodMoments) {
+        html += buildMomentLineHtml(g, moment);
+      }
+      html += '</div>';
     }
   }
 
@@ -2940,9 +2957,14 @@ async function shareMoment(e, g, moment, btn) {
   e.preventDefault();
   const url = momentShareUrl(g.date, moment._momentId);
   const title = `${displayPlayerName(moment.player)} — Dark Knights vs ${g.opp}`;
+  const when = moment.afterPeriod
+    ? `after ${moment.afterPeriod} period`
+    : moment.time
+    ? `${moment.period} ${moment.time}`
+    : moment.period;
   const text = moment.description
-    ? `${g.month} ${g.dayNum}, ${moment.period} ${moment.time} — ${moment.description}`
-    : `${g.month} ${g.dayNum}, ${moment.period} ${moment.time} — Moment highlight`;
+    ? `${g.month} ${g.dayNum}, ${when} — ${moment.description}`
+    : `${g.month} ${g.dayNum}, ${when} — Moment highlight`;
   await copyOrShare(url, title, text, btn);
 }
 
