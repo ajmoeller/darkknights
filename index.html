@@ -52,7 +52,7 @@
   }
 }
 </script>
-<link rel="icon" type="image/png" href="icon.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -2294,6 +2294,14 @@ const games = [
         player: "Aaron Moeller",
         clip: "assets/clips/give-n-go.mp4",
         attachedToGoal: { period: "1st", time: "11:31" }
+      },
+      {
+        id: "earning-the-shutout",
+        period: "3rd",
+        time: "0:19",
+        player: "Alex Higgins",
+        description: "Earning the Shutout",
+        clip: "assets/clips/earning-the-shutout.mp4"
       }
     ],
     score: {
@@ -2675,11 +2683,82 @@ function buildMomentLineHtml(g, moment, { attached = false } = {}) {
   </div>`;
 }
 
+// Moment clips load lazily (preload="none"), so a panel with many clips would
+// otherwise fire .play() on all of them at once and saturate the connection —
+// they all stall, then pop in together. Instead we load them sequentially in
+// top-to-bottom order, a couple at a time, and only once they enter the
+// viewport. Each clip that starts playing frees a slot for the next one down.
+const MOMENT_CLIP_CONCURRENCY = 2;
+let _momentClipLoading = 0;
+const _momentClipQueue = [];
+
+function _dequeueMomentClip(video) {
+  const i = _momentClipQueue.indexOf(video);
+  if (i >= 0) _momentClipQueue.splice(i, 1);
+}
+
+function _pumpMomentClips() {
+  // Keep the queue in document order so clips start top-to-bottom.
+  _momentClipQueue.sort((a, b) =>
+    (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
+  while (_momentClipLoading < MOMENT_CLIP_CONCURRENCY && _momentClipQueue.length) {
+    const video = _momentClipQueue.shift();
+    if (video.dataset.clipState !== 'queued') continue;
+    video.dataset.clipState = 'loading';
+    _momentClipLoading++;
+    const done = () => {
+      video.removeEventListener('playing', done);
+      video.removeEventListener('error', done);
+      if (video.dataset.clipState === 'loading') video.dataset.clipState = 'ready';
+      _momentClipLoading--;
+      _pumpMomentClips();
+    };
+    video.addEventListener('playing', done, { once: true });
+    video.addEventListener('error', done, { once: true });
+    video.play().catch(() => done());
+  }
+}
+
+function _queueMomentClip(video) {
+  const state = video.dataset.clipState;
+  if (state === 'ready' || state === 'loading') {
+    video.play().catch(() => {});
+    return;
+  }
+  if (state === 'queued') return;
+  video.dataset.clipState = 'queued';
+  _momentClipQueue.push(video);
+  _pumpMomentClips();
+}
+
+const momentClipObserver = ('IntersectionObserver' in window)
+  ? new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const video = entry.target;
+        if (entry.isIntersecting) {
+          _queueMomentClip(video);
+        } else if (video.dataset.clipState === 'queued') {
+          // Scrolled away before it got a turn — drop it back out of the queue.
+          video.dataset.clipState = '';
+          _dequeueMomentClip(video);
+        } else {
+          video.pause();
+        }
+      }
+    }, { rootMargin: '300px 0px', threshold: 0.01 })
+  : null;
+
 function setMomentClipsPlaying(panel, playing) {
   panel.querySelectorAll('video.moment-clip').forEach((video) => {
     if (playing) {
-      video.play().catch(() => {});
+      if (momentClipObserver) momentClipObserver.observe(video);
+      else video.play().catch(() => {});
     } else {
+      if (momentClipObserver) momentClipObserver.unobserve(video);
+      if (video.dataset.clipState === 'queued') {
+        video.dataset.clipState = '';
+        _dequeueMomentClip(video);
+      }
       video.pause();
     }
   });
