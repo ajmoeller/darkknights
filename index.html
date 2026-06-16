@@ -2810,8 +2810,10 @@ const MOMENT_VIDEO_ICON = '<svg class="moment-media-icon" viewBox="0 0 16 16" wi
 function gameMomentsTagHtml(g) {
   const count = countGameMoments(g);
   if (!count) return '';
-  const label = count === 1 ? '1 Moment' : `${count} Moments`;
   const { hasPhoto, hasVideo } = gameMomentMediaTypes(g);
+  // Photo-only games read as "Photos"; anything with video stays "Moments".
+  const noun = hasPhoto && !hasVideo ? 'Photo' : 'Moment';
+  const label = count === 1 ? `1 ${noun}` : `${count} ${noun}s`;
   let icons = '';
   if (hasPhoto) icons += MOMENT_PHOTO_ICON;
   if (hasVideo) icons += MOMENT_VIDEO_ICON;
