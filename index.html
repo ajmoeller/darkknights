@@ -461,6 +461,19 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
+  .goal-line .moment-line.moment-attached {
+    margin-top: 6px;
+    padding: 6px 0 2px 12px;
+    border-left: 2px solid rgba(158, 200, 232, 0.28);
+    border-bottom: none;
+    scroll-margin-top: 48px;
+    scroll-margin-bottom: 24px;
+  }
+
+  .goal-line .moment-line.moment-attached .goal-meta {
+    margin-bottom: 2px;
+  }
+
   .goal-line:last-child {
     border-bottom: none;
   }
@@ -2164,6 +2177,15 @@ const games = [
         player: "Taku Ide",
         description: "Breakaway Bail(s)",
         clip: "assets/clips/ide-too-eager.mp4"
+      },
+      {
+        id: "give-n-go",
+        period: "1st",
+        time: "11:35",
+        player: "Aaron Moeller and Jonah Hicks",
+        description: "Give-n-Go",
+        clip: "assets/clips/give-n-go.mp4",
+        attachedToGoal: { period: "1st", time: "11:31" }
       }
     ],
     score: {
@@ -2453,6 +2475,18 @@ function hockeyTimeSeconds(time) {
   return (parts[0] || 0) * 60 + (parts[1] || 0);
 }
 
+function goalEventKey(period, time) {
+  return `${period}-${time}`;
+}
+
+function momentsAttachedToGoal(g, goal) {
+  const key = goalEventKey(goal.period, goal.time);
+  return (g.customMoments || []).filter((moment) =>
+    moment.attachedToGoal &&
+    goalEventKey(moment.attachedToGoal.period, moment.attachedToGoal.time) === key
+  );
+}
+
 function buildPeriodTimeline(g) {
   const periods = {};
   for (const goal of g.dkGoals || []) {
@@ -2460,6 +2494,7 @@ function buildPeriodTimeline(g) {
     periods[goal.period].push({ kind: 'goal', time: goal.time, goal });
   }
   for (const moment of g.customMoments || []) {
+    if (moment.attachedToGoal) continue;
     if (!periods[moment.period]) periods[moment.period] = [];
     periods[moment.period].push({ kind: 'moment', time: moment.time, moment });
   }
@@ -2487,22 +2522,29 @@ function buildGoalLineHtml(g, goal) {
   const metaEndHtml = metaEnd
     ? `<span class="goal-meta-end">${metaEnd}</span>`
     : '';
+  const attachedMomentsHtml = momentsAttachedToGoal(g, goal)
+    .map((moment) => buildMomentLineHtml(g, moment, { attached: true }))
+    .join('');
   return `<div class="goal-line">
     <div class="goal-meta"><span class="goal-time">${goal.time}</span>${metaEndHtml}</div>
     <div class="goal-scorer">${displayPlayerName(goal.scorer)} <span class="running-total">(${goal._goalTotal})</span></div>
     <div class="goal-assist">${assistStr !== null ? `${goal.assists.length === 1 ? 'Assist:' : 'Assists:'} ${assistStr}` : 'Unassisted'}</div>
+    ${attachedMomentsHtml}
   </div>`;
 }
 
-function buildMomentLineHtml(g, moment) {
+function buildMomentLineHtml(g, moment, { attached = false } = {}) {
   const expandBtn = `<button type="button" class="moment-expand-btn" aria-expanded="false" aria-label="Expand video" title="Expand video"><svg class="moment-expand-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M2.5 5.5V2.5h3M13.5 5.5V2.5h-3M2.5 10.5v3h3M13.5 10.5v3h-3"/></svg><svg class="moment-collapse-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M5.5 2.5H2.5v3M10.5 2.5h3v3M5.5 13.5H2.5v-3M10.5 13.5h3v-3"/></svg></button>`;
   const clipHtml = moment.clip
     ? `<div class="moment-clip-wrap"><video class="moment-clip" src="${moment.clip}" autoplay loop muted playsinline preload="metadata" aria-label="${moment.description}"></video>${expandBtn}</div>`
     : '';
   const shareBtn = `<button type="button" class="moment-share-btn" data-moment-id="${moment._momentId}" aria-label="Share this moment" title="Share moment"><svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M6.2 9.1a2.6 2.6 0 0 0 3.7 0l1.5-1.5a2.6 2.6 0 0 0-3.7-3.7L6.7 4.4M9.8 6.9a2.6 2.6 0 0 0-3.7 0L4.6 8.4a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg></button>`;
-  return `<div class="moment-line" id="moment-${moment._momentId}">
-    <div class="goal-meta"><span class="goal-time">${moment.time}</span><span class="goal-meta-end"><span class="moment-badge">Moment</span>${shareBtn}</span></div>
-    <div class="goal-scorer">${displayPlayerName(moment.player)} <span class="running-total">(${moment._momentTotal})</span></div>
+  const timeHtml = attached ? '' : `<span class="goal-time">${moment.time}</span>`;
+  const attachedClass = attached ? ' moment-attached' : '';
+  const playerHtml = attached ? '' : `<div class="goal-scorer">${displayPlayerName(moment.player)} <span class="running-total">(${moment._momentTotal})</span></div>`;
+  return `<div class="moment-line${attachedClass}" id="moment-${moment._momentId}">
+    <div class="goal-meta">${timeHtml}<span class="goal-meta-end"><span class="moment-badge">Moment</span>${shareBtn}</span></div>
+    ${playerHtml}
     <div class="moment-desc">${moment.description}</div>
     ${clipHtml}
   </div>`;
