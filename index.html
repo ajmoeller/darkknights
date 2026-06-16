@@ -405,6 +405,9 @@
   }
 
   .game-moments-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 0.58rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -416,6 +419,15 @@
     box-shadow: 0 0 10px rgba(100, 190, 255, 0.22);
     white-space: nowrap;
     flex-shrink: 0;
+  }
+
+  .game-moments-tag .moment-media-icon {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .game-moments-tag .moment-media-icon + .moment-media-icon {
+    margin-left: -1px;
   }
 
   .game-card.has-goals-toggle:hover .game-moments-tag,
@@ -779,6 +791,56 @@
   .photo-lightbox-close:hover,
   .photo-lightbox-close:focus-visible {
     background: rgba(255, 255, 255, 0.2);
+  }
+
+  .moment-gallery {
+    margin: 14px 0 4px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .moment-gallery-heading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #b8e4ff;
+  }
+
+  .moment-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+
+  .gallery-thumb {
+    position: relative;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+    cursor: zoom-in;
+    aspect-ratio: 3 / 2;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .gallery-thumb:hover,
+  .gallery-thumb:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(160, 220, 255, 0.7);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    outline: none;
+  }
+
+  .gallery-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .box-score-summary {
@@ -1926,6 +1988,15 @@ const games = [
         badges: [],
         scoreAtTime: "Buc 2, Buc 7"
       }
+    ],
+    gallery: [
+      "assets/photos/sea-dogs-may17-1.jpg",
+      "assets/photos/sea-dogs-may17-1b.jpg",
+      "assets/photos/sea-dogs-may17-2.jpg",
+      "assets/photos/sea-dogs-may17-3.jpg",
+      "assets/photos/sea-dogs-may17-4.jpg",
+      "assets/photos/sea-dogs-may17-5.jpg",
+      "assets/photos/sea-dogs-may17-6.jpg"
     ]
   },
   {
@@ -2666,14 +2737,32 @@ function hockeyTimeSeconds(time) {
 }
 
 function countGameMoments(g) {
-  return (g.customMoments || []).length;
+  return (g.customMoments || []).length + (g.gallery || []).length;
 }
+
+// Which kinds of media the game's moments contain — drives the tag icon.
+function gameMomentMediaTypes(g) {
+  const moments = g.customMoments || [];
+  return {
+    hasPhoto: moments.some((m) => m.photo) || (g.gallery || []).length > 0,
+    hasVideo: moments.some((m) => m.clip),
+  };
+}
+
+const MOMENT_PHOTO_ICON = '<svg class="moment-media-icon" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" d="M2 4.5h2l1-1.5h6l1 1.5h2v8H2z"/><circle cx="8" cy="8.5" r="2.4" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
+const MOMENT_VIDEO_ICON = '<svg class="moment-media-icon" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><rect x="1.5" y="3.5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path fill="currentColor" d="M14.5 5l-3 2.2v1.6l3 2.2z"/></svg>';
 
 function gameMomentsTagHtml(g) {
   const count = countGameMoments(g);
   if (!count) return '';
   const label = count === 1 ? '1 Moment' : `${count} Moments`;
-  return `<span class="game-moments-tag">${label}</span>`;
+  const { hasPhoto, hasVideo } = gameMomentMediaTypes(g);
+  let icons = '';
+  if (hasPhoto) icons += MOMENT_PHOTO_ICON;
+  if (hasVideo) icons += MOMENT_VIDEO_ICON;
+  const mediaLabel = hasPhoto && hasVideo ? 'photos and videos' : hasPhoto ? 'photos' : hasVideo ? 'videos' : '';
+  const titleAttr = mediaLabel ? ` title="Includes ${mediaLabel}"` : '';
+  return `<span class="game-moments-tag"${titleAttr}>${icons}<span>${label}</span></span>`;
 }
 
 function buildGameToggleHint(g) {
@@ -2828,7 +2917,7 @@ const momentClipObserver = ('IntersectionObserver' in window)
 function setMomentClipsPlaying(panel, playing) {
   if (playing) {
     // Photos are tiny; load them as soon as the game is opened.
-    panel.querySelectorAll('img.moment-photo[data-src]').forEach((img) => {
+    panel.querySelectorAll('img.moment-photo[data-src], img.gallery-thumb-img[data-src]').forEach((img) => {
       img.src = img.dataset.src;
       img.removeAttribute('data-src');
     });
@@ -2857,7 +2946,8 @@ function buildGoalsPanel(g) {
 
   const hasGoals = g.dkGoals && g.dkGoals.length > 0;
   const hasMoments = g.customMoments && g.customMoments.length > 0;
-  if (!hasGoals && !hasMoments) {
+  const hasGallery = g.gallery && g.gallery.length > 0;
+  if (!hasGoals && !hasMoments && !hasGallery) {
     panel.innerHTML = html + '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
     return panel;
   }
@@ -2884,10 +2974,34 @@ function buildGoalsPanel(g) {
     }
   }
 
+  html += buildGalleryHtml(g);
+
   panel.innerHTML = html;
   attachMomentShareButtons(panel, g);
   attachMomentExpandButtons(panel);
+  attachGalleryButtons(panel);
   return panel;
+}
+
+// A game's photo gallery — a grid of thumbnails that open in the lightbox.
+function buildGalleryHtml(g) {
+  const photos = g.gallery || [];
+  if (!photos.length) return '';
+  const label = photos.length === 1 ? '1 Photo' : `${photos.length} Photos`;
+  const thumbs = photos.map((src, i) =>
+    `<button type="button" class="gallery-thumb" data-full="${src}" aria-label="View photo ${i + 1} of ${photos.length}"><img class="gallery-thumb-img" data-src="${src}" alt="Game photo ${i + 1}" loading="lazy"></button>`
+  ).join('');
+  return `<div class="moment-gallery"><div class="moment-gallery-heading">${MOMENT_PHOTO_ICON}<span>${label}</span></div><div class="moment-gallery-grid">${thumbs}</div></div>`;
+}
+
+function attachGalleryButtons(panel) {
+  panel.querySelectorAll('.gallery-thumb').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const img = btn.querySelector('img');
+      openPhotoLightbox(btn.dataset.full, img ? img.alt : '');
+    });
+  });
 }
 
 // Goals section heading when goal list follows box score summary
