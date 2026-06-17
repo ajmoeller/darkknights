@@ -791,6 +791,13 @@
     border-radius: 8px;
     box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6);
     cursor: default;
+    transition: filter 0.3s ease;
+  }
+
+  /* Blur-up: the tiny thumbnail is shown scaled up and blurred until the full
+     image has loaded, so the lightbox never opens to an empty frame. */
+  .photo-lightbox img.blurring {
+    filter: blur(14px);
   }
 
   .photo-lightbox-close {
@@ -2909,13 +2916,28 @@ function buildGoalLineHtml(g, goal) {
   </div>`;
 }
 
+// Web-optimized derivatives produced by build_media.sh. Paths are derived from
+// the original by convention so the data only ever stores the original path.
+function mediaBaseName(path) {
+  return (path || '').split('/').pop().replace(/\.[^.]+$/, '');
+}
+function photoFullSrc(src) {
+  return `assets/photos/web/${mediaBaseName(src)}.webp`;
+}
+function photoThumbSrc(src) {
+  return `assets/photos/web/${mediaBaseName(src)}.thumb.webp`;
+}
+function clipPosterSrc(src) {
+  return `assets/clips/web/${mediaBaseName(src)}.poster.webp`;
+}
+
 function buildMomentLineHtml(g, moment, { attached = false } = {}) {
   const mediaWord = moment.photo ? 'photo' : 'video';
   const expandBtn = `<button type="button" class="moment-expand-btn" aria-expanded="false" aria-label="Expand ${mediaWord}" title="Expand ${mediaWord}"><svg class="moment-expand-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M2.5 5.5V2.5h3M13.5 5.5V2.5h-3M2.5 10.5v3h3M13.5 10.5v3h-3"/></svg><svg class="moment-collapse-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M5.5 2.5H2.5v3M10.5 2.5h3v3M5.5 13.5H2.5v-3M10.5 13.5h3v-3"/></svg></button>`;
   const clipHtml = moment.photo
-    ? `<div class="moment-clip-wrap"><img class="moment-clip moment-photo" data-src="${moment.photo}" alt="${moment.description || 'Moment photo'}">${expandBtn}</div>`
+    ? `<div class="moment-clip-wrap"><img class="moment-clip moment-photo" data-src="${photoThumbSrc(moment.photo)}" data-full="${photoFullSrc(moment.photo)}" data-fallback="${moment.photo}" onerror="this.onerror=null;this.src=this.dataset.fallback" alt="${moment.description || 'Moment photo'}">${expandBtn}</div>`
     : moment.clip
-    ? `<div class="moment-clip-wrap"><video class="moment-clip" src="${moment.clip}" loop muted playsinline preload="none" aria-label="${moment.description || 'Moment highlight'}"></video>${expandBtn}</div>`
+    ? `<div class="moment-clip-wrap"><video class="moment-clip" src="${moment.clip}" poster="${clipPosterSrc(moment.clip)}" loop muted playsinline preload="none" aria-label="${moment.description || 'Moment highlight'}"></video>${expandBtn}</div>`
     : '';
   const shareBtn = `<button type="button" class="moment-share-btn" data-moment-id="${moment._momentId}" aria-label="Share this moment" title="Share moment"><svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M6.2 9.1a2.6 2.6 0 0 0 3.7 0l1.5-1.5a2.6 2.6 0 0 0-3.7-3.7L6.7 4.4M9.8 6.9a2.6 2.6 0 0 0-3.7 0L4.6 8.4a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg></button>`;
   const timeHtml = (attached || !moment.time) ? '' : `<span class="goal-time">${moment.time}</span>`;
@@ -3072,7 +3094,7 @@ function buildGalleryHtml(g) {
   if (!photos.length) return '';
   const label = photos.length === 1 ? '1 Photo' : `${photos.length} Photos`;
   const thumbs = photos.map((src, i) =>
-    `<button type="button" class="gallery-thumb" data-full="${src}" aria-label="View photo ${i + 1} of ${photos.length}"><img class="gallery-thumb-img" data-src="${src}" alt="Game photo ${i + 1}" loading="lazy"></button>`
+    `<button type="button" class="gallery-thumb" data-full="${photoFullSrc(src)}" data-fallback="${src}" aria-label="View photo ${i + 1} of ${photos.length}"><img class="gallery-thumb-img" data-src="${photoThumbSrc(src)}" data-fallback="${src}" onerror="this.onerror=null;this.src=this.dataset.fallback" alt="Game photo ${i + 1}" loading="lazy"></button>`
   ).join('');
   return `<div class="moment-gallery"><div class="moment-gallery-heading">${MOMENT_PHOTO_ICON}<span>${label}</span></div><div class="moment-gallery-grid">${thumbs}</div></div>`;
 }
@@ -3081,11 +3103,16 @@ function attachGalleryButtons(panel) {
   const thumbs = [...panel.querySelectorAll('.gallery-thumb')];
   const items = thumbs.map((btn) => ({
     src: btn.dataset.full,
+    fallback: btn.dataset.fallback,
+    thumb: btn.querySelector('img')?.currentSrc || btn.querySelector('img')?.dataset.src,
     alt: btn.querySelector('img')?.alt || '',
   }));
   thumbs.forEach((btn, i) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      // Refresh the thumb (it may have loaded since render) for the blur-up.
+      const img = btn.querySelector('img');
+      items[i].thumb = img?.currentSrc || img?.getAttribute('src') || items[i].thumb;
       openPhotoLightbox(items, null, i);
     });
   });
@@ -3188,18 +3215,39 @@ function getPhotoLightbox() {
 // Current set of images the lightbox can page through.
 let _lightboxItems = [];
 let _lightboxIndex = 0;
+let _lightboxToken = 0;
 
 function renderPhotoLightbox() {
   const lb = getPhotoLightbox();
   const item = _lightboxItems[_lightboxIndex];
   if (!item) return;
   const img = lb.querySelector('img');
-  img.src = item.src;
   img.alt = item.alt || '';
   const multi = _lightboxItems.length > 1;
   lb.classList.toggle('has-nav', multi);
   const counter = lb.querySelector('.photo-lightbox-counter');
   if (counter) counter.textContent = multi ? `${_lightboxIndex + 1} / ${_lightboxItems.length}` : '';
+
+  // Blur-up: show the (usually already-cached) thumbnail instantly, then swap in
+  // the full image once it has decoded. A token guards against fast navigation
+  // resolving an out-of-order load. Falls back to the original file on error.
+  const token = ++_lightboxToken;
+  if (item.thumb && img.src !== item.thumb) {
+    img.classList.add('blurring');
+    img.src = item.thumb;
+  }
+  const full = new Image();
+  full.onload = () => {
+    if (token !== _lightboxToken) return;
+    img.src = full.src;
+    img.classList.remove('blurring');
+  };
+  full.onerror = () => {
+    if (token !== _lightboxToken) return;
+    img.src = item.fallback || item.thumb || full.src;
+    img.classList.remove('blurring');
+  };
+  full.src = item.src;
 }
 
 function stepPhotoLightbox(delta) {
@@ -3233,7 +3281,12 @@ function attachMomentExpandButtons(panel) {
       // Photos open in a full-screen lightbox (tap the image or the button).
       const open = (e) => {
         e.stopPropagation();
-        openPhotoLightbox(photo.currentSrc || photo.getAttribute('src') || photo.dataset.src, photo.alt);
+        openPhotoLightbox([{
+          src: photo.dataset.full || photo.currentSrc || photo.getAttribute('src'),
+          fallback: photo.dataset.fallback,
+          thumb: photo.currentSrc || photo.getAttribute('src') || photo.dataset.src,
+          alt: photo.alt,
+        }], null, 0);
       };
       photo.addEventListener('click', open);
       if (btn) btn.addEventListener('click', open);
