@@ -734,7 +734,7 @@
     color: var(--text-dim);
     opacity: 0.65;
     cursor: pointer;
-    display: none;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
@@ -756,9 +756,14 @@
     display: none;
   }
 
-  @media (min-width: 521px) {
+  @media (max-width: 520px) {
+    /* Bigger tap target on phones, and tapping the video itself goes fullscreen. */
     .moment-expand-btn {
-      display: inline-flex;
+      padding: 6px;
+      opacity: 0.85;
+    }
+    video.moment-clip {
+      cursor: pointer;
     }
   }
 
@@ -3314,9 +3319,37 @@ function openPhotoLightbox(srcOrItems, alt, index = 0) {
   document.body.style.overflow = 'hidden';
 }
 
+const isMobileViewport = () => window.matchMedia('(max-width: 520px)').matches;
+
+// On phones there's no room to expand inline, so clips play fullscreen instead.
+// iOS Safari doesn't support the standard Fullscreen API on elements, but it
+// does expose webkitEnterFullscreen() on <video>, so fall back to that.
+function enterVideoFullscreen(video) {
+  if (!video) return;
+  video.play().catch(() => {});
+  if (video.requestFullscreen) {
+    video.setAttribute('controls', '');
+    video.requestFullscreen().catch(() => {});
+  } else if (video.webkitRequestFullscreen) {
+    video.setAttribute('controls', '');
+    video.webkitRequestFullscreen();
+  } else if (video.webkitEnterFullscreen) {
+    video.webkitEnterFullscreen();
+  }
+}
+
+// When the user leaves element-fullscreen, drop the temporary controls again.
+['fullscreenchange', 'webkitfullscreenchange'].forEach((ev) => {
+  document.addEventListener(ev, () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    document.querySelectorAll('video.moment-clip[controls]').forEach((v) => v.removeAttribute('controls'));
+  });
+});
+
 function attachMomentExpandButtons(panel) {
   panel.querySelectorAll('.moment-clip-wrap').forEach((wrap) => {
     const photo = wrap.querySelector('img.moment-photo');
+    const video = wrap.querySelector('video.moment-clip');
     const btn = wrap.querySelector('.moment-expand-btn');
     if (photo) {
       // Photos open in a full-screen lightbox (tap the image or the button).
@@ -3333,10 +3366,22 @@ function attachMomentExpandButtons(panel) {
       if (btn) btn.addEventListener('click', open);
       return;
     }
+    if (video) {
+      // On phones, tapping the video plays it fullscreen.
+      video.addEventListener('click', (e) => {
+        if (!isMobileViewport()) return;
+        e.stopPropagation();
+        enterVideoFullscreen(video);
+      });
+    }
     if (!btn) return;
-    // Videos expand inline within the panel.
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      // Phones: fullscreen. Larger screens: expand inline within the panel.
+      if (isMobileViewport()) {
+        enterVideoFullscreen(video);
+        return;
+      }
       const expanded = wrap.classList.toggle('expanded');
       btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
       const label = `${expanded ? 'Collapse' : 'Expand'} video`;
