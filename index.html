@@ -430,6 +430,17 @@
     margin-left: -1px;
   }
 
+  .game-media-part {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .game-media-sep {
+    text-transform: none;
+    opacity: 0.85;
+  }
+
   .game-card.has-goals-toggle:hover .game-moments-tag,
   .game-card.has-goals-toggle:focus-visible .game-moments-tag {
     border-color: rgba(160, 220, 255, 0.75);
@@ -2929,35 +2940,43 @@ function hockeyTimeSeconds(time) {
   return (parts[0] || 0) * 60 + (parts[1] || 0);
 }
 
-function countGameMoments(g) {
-  return (g.customMoments || []).length + (g.gallery || []).length;
-}
-
-// Which kinds of media the game's moments contain — drives the tag icon.
-function gameMomentMediaTypes(g) {
+function gameMediaCounts(g) {
   const moments = g.customMoments || [];
   return {
-    hasPhoto: moments.some((m) => m.photo) || (g.gallery || []).length > 0,
-    hasVideo: moments.some((m) => m.clip),
+    photos: (g.gallery || []).length + moments.filter((m) => m.photo).length,
+    videos: moments.filter((m) => m.clip).length,
   };
+}
+
+function formatMediaCount(count, singular) {
+  return count === 1 ? `1 ${singular}` : `${count} ${singular}s`;
+}
+
+function gameMediaSummary(g, { lowercase = false } = {}) {
+  const { photos, videos } = gameMediaCounts(g);
+  const parts = [];
+  if (photos) parts.push(formatMediaCount(photos, lowercase ? 'photo' : 'Photo'));
+  if (videos) parts.push(formatMediaCount(videos, lowercase ? 'moment' : 'Moment'));
+  return parts.join(' and ');
 }
 
 const MOMENT_PHOTO_ICON = '<svg class="moment-media-icon" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" d="M2 4.5h2l1-1.5h6l1 1.5h2v8H2z"/><circle cx="8" cy="8.5" r="2.4" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
 const MOMENT_VIDEO_ICON = '<svg class="moment-media-icon" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><rect x="1.5" y="3.5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path fill="currentColor" d="M14.5 5l-3 2.2v1.6l3 2.2z"/></svg>';
 
 function gameMomentsTagHtml(g) {
-  const count = countGameMoments(g);
-  if (!count) return '';
-  const { hasPhoto, hasVideo } = gameMomentMediaTypes(g);
-  // Photo-only games read as "Photos"; anything with video stays "Moments".
-  const noun = hasPhoto && !hasVideo ? 'Photo' : 'Moment';
-  const label = count === 1 ? `1 ${noun}` : `${count} ${noun}s`;
-  let icons = '';
-  if (hasPhoto) icons += MOMENT_PHOTO_ICON;
-  if (hasVideo) icons += MOMENT_VIDEO_ICON;
-  const mediaLabel = hasPhoto && hasVideo ? 'photos and videos' : hasPhoto ? 'photos' : hasVideo ? 'videos' : '';
-  const titleAttr = mediaLabel ? ` title="Includes ${mediaLabel}"` : '';
-  return `<span class="game-moments-tag"${titleAttr}>${icons}<span>${label}</span></span>`;
+  const { photos, videos } = gameMediaCounts(g);
+  if (!photos && !videos) return '';
+
+  const segments = [];
+  if (photos) {
+    segments.push(`<span class="game-media-part">${MOMENT_PHOTO_ICON}<span>${formatMediaCount(photos, 'Photo')}</span></span>`);
+  }
+  if (videos) {
+    segments.push(`<span class="game-media-part">${MOMENT_VIDEO_ICON}<span>${formatMediaCount(videos, 'Moment')}</span></span>`);
+  }
+  const inner = segments.join('<span class="game-media-sep"> and </span>');
+  const titleAttr = ` title="${gameMediaSummary(g, { lowercase: true })}"`;
+  return `<span class="game-moments-tag"${titleAttr}>${inner}</span>`;
 }
 
 function buildGameToggleHint(g) {
@@ -3650,9 +3669,9 @@ games.forEach((g, i) => {
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
     card.setAttribute('aria-expanded', 'false');
-    const momentCount = countGameMoments(g);
-    const ariaDetail = momentCount
-      ? `Show goals and ${momentCount} moment${momentCount === 1 ? '' : 's'}`
+    const mediaSummary = gameMediaSummary(g, { lowercase: true });
+    const ariaDetail = mediaSummary
+      ? `Show goals, ${mediaSummary}`
       : 'Show goals';
     card.setAttribute('aria-label', `${ariaDetail}: ${g.month} ${g.dayNum} vs ${g.opp}`);
     const panel = buildGoalsPanel(g);
