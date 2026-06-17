@@ -1055,6 +1055,28 @@
     color: #fff;
   }
 
+  .photo-credit {
+    margin: 12px 0 4px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    text-align: right;
+  }
+
+  .photo-credit a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s, opacity 0.2s;
+  }
+
+  .photo-credit a:hover {
+    color: #fff;
+  }
+
   .game-share-btn {
     position: absolute;
     left: 8px;
@@ -2927,6 +2949,22 @@ function photoFullSrc(src) {
 function photoThumbSrc(src) {
   return `assets/photos/web/${mediaBaseName(src)}.thumb.webp`;
 }
+
+const PHOTO_SOURCE_URL = 'https://www.facebook.com/profile.php?id=61551355211283';
+const PHOTO_SOURCE_NAME = 'Eighty8 Images';
+
+function gameHasPhotos(g) {
+  return !!(
+    g.photos ||
+    (g.gallery && g.gallery.length) ||
+    (g.customMoments || []).some((m) => m.photo)
+  );
+}
+
+function buildPhotoCreditHtml(g) {
+  if (!gameHasPhotos(g)) return '';
+  return `<p class="photo-credit">Photos by <a href="${PHOTO_SOURCE_URL}" target="_blank" rel="noopener noreferrer">${PHOTO_SOURCE_NAME}</a></p>`;
+}
 function clipPosterSrc(src) {
   return `assets/clips/web/${mediaBaseName(src)}.poster.webp`;
 }
@@ -3055,7 +3093,7 @@ function buildGoalsPanel(g) {
   const hasMoments = g.customMoments && g.customMoments.length > 0;
   const hasGallery = g.gallery && g.gallery.length > 0;
   if (!hasGoals && !hasMoments && !hasGallery) {
-    panel.innerHTML = html + '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>';
+    panel.innerHTML = html + '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>' + buildPhotoCreditHtml(g);
     return panel;
   }
 
@@ -3082,6 +3120,7 @@ function buildGoalsPanel(g) {
   }
 
   html += buildGalleryHtml(g);
+  html += buildPhotoCreditHtml(g);
 
   panel.innerHTML = html;
   attachMomentShareButtons(panel, g);
