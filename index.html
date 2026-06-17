@@ -2932,20 +2932,22 @@ function clipPosterSrc(src) {
 }
 
 function buildMomentLineHtml(g, moment, { attached = false } = {}) {
-  const mediaWord = moment.photo ? 'photo' : 'video';
+  const isPhoto = !!moment.photo;
+  const mediaWord = isPhoto ? 'photo' : 'video';
+  const badgeLabel = isPhoto ? 'Photo' : 'Moment';
   const expandBtn = `<button type="button" class="moment-expand-btn" aria-expanded="false" aria-label="Expand ${mediaWord}" title="Expand ${mediaWord}"><svg class="moment-expand-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M2.5 5.5V2.5h3M13.5 5.5V2.5h-3M2.5 10.5v3h3M13.5 10.5v3h-3"/></svg><svg class="moment-collapse-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M5.5 2.5H2.5v3M10.5 2.5h3v3M5.5 13.5H2.5v-3M10.5 13.5h3v-3"/></svg></button>`;
   const clipHtml = moment.photo
-    ? `<div class="moment-clip-wrap"><img class="moment-clip moment-photo" data-src="${photoThumbSrc(moment.photo)}" data-full="${photoFullSrc(moment.photo)}" data-fallback="${moment.photo}" onerror="this.onerror=null;this.src=this.dataset.fallback" alt="${moment.description || 'Moment photo'}">${expandBtn}</div>`
+    ? `<div class="moment-clip-wrap"><img class="moment-clip moment-photo" data-src="${photoThumbSrc(moment.photo)}" data-full="${photoFullSrc(moment.photo)}" data-fallback="${moment.photo}" onerror="this.onerror=null;this.src=this.dataset.fallback" alt="${moment.description || 'Photo'}">${expandBtn}</div>`
     : moment.clip
     ? `<div class="moment-clip-wrap"><video class="moment-clip" src="${moment.clip}" poster="${clipPosterSrc(moment.clip)}" loop muted playsinline preload="none" aria-label="${moment.description || 'Moment highlight'}"></video>${expandBtn}</div>`
     : '';
-  const shareBtn = `<button type="button" class="moment-share-btn" data-moment-id="${moment._momentId}" aria-label="Share this moment" title="Share moment"><svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M6.2 9.1a2.6 2.6 0 0 0 3.7 0l1.5-1.5a2.6 2.6 0 0 0-3.7-3.7L6.7 4.4M9.8 6.9a2.6 2.6 0 0 0-3.7 0L4.6 8.4a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg></button>`;
+  const shareBtn = `<button type="button" class="moment-share-btn" data-moment-id="${moment._momentId}" aria-label="Share this ${mediaWord}" title="Share ${mediaWord}"><svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M6.2 9.1a2.6 2.6 0 0 0 3.7 0l1.5-1.5a2.6 2.6 0 0 0-3.7-3.7L6.7 4.4M9.8 6.9a2.6 2.6 0 0 0-3.7 0L4.6 8.4a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg></button>`;
   const timeHtml = (attached || !moment.time) ? '' : `<span class="goal-time">${moment.time}</span>`;
   const attachedClass = attached ? ' moment-attached' : (moment.afterPeriod ? ' moment-after-period' : '');
   const playerHtml = attached ? '' : `<span class="goal-scorer">${displayPlayerName(moment.player)} <span class="running-total">(${moment._momentTotal})</span></span>`;
   const headerHtml = attached
-    ? `<div class="goal-meta">${timeHtml}<span class="goal-meta-end"><span class="moment-badge">Moment</span>${shareBtn}</span></div>`
-    : `<div class="moment-header"><div class="moment-header-start">${timeHtml}${playerHtml}</div><span class="goal-meta-end"><span class="moment-badge">Moment</span>${shareBtn}</span></div>`;
+    ? `<div class="goal-meta">${timeHtml}<span class="goal-meta-end"><span class="moment-badge">${badgeLabel}</span>${shareBtn}</span></div>`
+    : `<div class="moment-header"><div class="moment-header-start">${timeHtml}${playerHtml}</div><span class="goal-meta-end"><span class="moment-badge">${badgeLabel}</span>${shareBtn}</span></div>`;
   const descHtml = moment.description ? `<div class="moment-desc">${moment.description}</div>` : '';
   return `<div class="moment-line${attachedClass}" id="moment-${moment._momentId}">
     ${headerHtml}
@@ -3356,9 +3358,10 @@ async function shareMoment(e, g, moment, btn) {
     : moment.time
     ? `${moment.period} ${moment.time}`
     : moment.period;
+  const fallbackLabel = moment.photo ? 'Photo' : 'Moment highlight';
   const text = moment.description
     ? `${g.month} ${g.dayNum}, ${when} — ${moment.description}`
-    : `${g.month} ${g.dayNum}, ${when} — Moment highlight`;
+    : `${g.month} ${g.dayNum}, ${when} — ${fallbackLabel}`;
   await copyOrShare(url, title, text, btn);
 }
 
