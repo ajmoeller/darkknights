@@ -53,8 +53,54 @@
 }
 </script>
 <link rel="icon" type="image/png" href="assets/favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/barlow-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/barlow-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/oswald.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  @font-face {
+    font-family: 'Barlow';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('assets/fonts/barlow-400.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Barlow';
+    font-style: normal;
+    font-weight: 500;
+    font-display: block;
+    src: url('assets/fonts/barlow-500.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Barlow';
+    font-style: normal;
+    font-weight: 600;
+    font-display: block;
+    src: url('assets/fonts/barlow-600.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('assets/fonts/oswald.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 600;
+    font-display: block;
+    src: url('assets/fonts/oswald.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 700;
+    font-display: block;
+    src: url('assets/fonts/oswald.woff2') format('woff2');
+  }
+
   :root {
     --bg: #0a0a0f;
     --card: #12121c;
