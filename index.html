@@ -1268,6 +1268,7 @@
   <div class="subtitle">BIHL 2026 Season Schedule — Div 2 Buccaneers</div>
   <div class="stats-bar">
     <div class="stat"><div class="stat-num" id="stat-record">0-0-0</div><div class="stat-label">Record</div></div>
+    <div class="stat"><div class="stat-num" id="stat-goals">0-0</div><div class="stat-label">Goals</div></div>
     <div class="stat"><div class="stat-num" id="stat-remaining">18</div><div class="stat-label">Games Remaining</div></div>
     <div class="stat"><div class="stat-num" id="stat-home">9</div><div class="stat-label">Home</div></div>
     <div class="stat"><div class="stat-num" id="stat-away">9</div><div class="stat-label">Away</div></div>
@@ -2825,6 +2826,7 @@ const today = new Date();
 today.setHours(0,0,0,0);
 
 let wins = 0, losses = 0, ties = 0;
+let goalsFor = 0, goalsAgainst = 0;
 let gamesRemaining = 0;
 let homeRemaining = 0, awayRemaining = 0;
 let boondallRemaining = 0, acaciaRemaining = 0;
@@ -2833,6 +2835,8 @@ let nextGameIdx = -1;
 for (let i = 0; i < games.length; i++) {
   if (games[i].score) {
     const { dk, opp } = games[i].score;
+    goalsFor += dk;
+    goalsAgainst += opp;
     if (dk > opp) wins++;
     else if (dk < opp) losses++;
     else ties++;
@@ -2852,6 +2856,7 @@ for (let i = 0; i < games.length; i++) {
 }
 
 document.getElementById('stat-record').textContent = `${wins}-${losses}-${ties}`;
+document.getElementById('stat-goals').textContent = `${goalsFor}-${goalsAgainst}`;
 document.getElementById('stat-remaining').textContent = gamesRemaining;
 document.getElementById('stat-home').textContent = homeRemaining;
 document.getElementById('stat-away').textContent = awayRemaining;
