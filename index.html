@@ -330,6 +330,14 @@
     flex-wrap: wrap;
   }
 
+  .game-note {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    margin-top: 3px;
+    font-style: italic;
+    opacity: 0.85;
+  }
+
   .tag {
     font-size: 0.6rem;
     font-weight: 600;
@@ -2892,7 +2900,8 @@ const games = [
     ha: "home",
     opp: "Old Timers",
     venue: "Boondall IceWorld",
-    vclass: "venue-boondall"
+    vclass: "venue-boondall",
+    note: "Rescheduled from 8:15 PM"
   },
   {
     date: "2026-07-26",
@@ -3980,6 +3989,7 @@ games.forEach((g, i) => {
         <span class="tag ${g.ha === 'home' ? 'tag-home' : 'tag-away'}">${g.ha}</span>
         <span class="game-venue ${g.vclass}"><span class="venue-dot"></span>${g.venue}</span>
       </div>
+      ${g.note ? `<div class="game-note">${g.note}</div>` : ''}
     </div>
     ${timeOrScoreHtml}
     ${toggleHint}
@@ -4004,6 +4014,7 @@ games.forEach((g, i) => {
         ${isNext ? `<img src="assets/${g.ha === 'home' ? 'darkjersey' : 'whitejersey'}.png" style="width:20px;height:20px;vertical-align:middle;margin-left:6px;border-radius:3px;" alt="${g.ha} jersey logo">` : ''}
         <span class="game-venue ${g.vclass}"><span class="venue-dot"></span>${g.venue}</span>
       </div>
+      ${g.note ? `<div class="game-note">${g.note}</div>` : ''}
     </div>
     ${timeOrScoreHtml}
   `;
