@@ -2950,7 +2950,8 @@ const games = [
           "Jonah Hicks"
         ],
         badges: [],
-        scoreAtTime: "Buc 4, Sta 0"
+        scoreAtTime: "Buc 4, Sta 0",
+        _goalTotal: 7
       },
       {
         period: "3rd",
@@ -3086,8 +3087,12 @@ const _momentRunning = {};
 games.forEach(g => {
   if (g.dkGoals) {
     g.dkGoals.forEach(goal => {
-      _goalRunning[goal.scorer] = (_goalRunning[goal.scorer] || 0) + 1;
-      goal._goalTotal = _goalRunning[goal.scorer];
+      if (goal._goalTotal != null) {
+        _goalRunning[goal.scorer] = goal._goalTotal;
+      } else {
+        _goalRunning[goal.scorer] = (_goalRunning[goal.scorer] || 0) + 1;
+        goal._goalTotal = _goalRunning[goal.scorer];
+      }
       goal._assistTotals = {};
       (goal.assists || []).forEach(a => {
         _assistRunning[a] = (_assistRunning[a] || 0) + 1;
