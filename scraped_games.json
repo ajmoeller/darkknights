@@ -960,5 +960,66 @@
         "scoreAtTime": "Buc 9, Sta 0"
       }
     ]
+  },
+  "2516474": {
+    "date": "2026-07-12",
+    "gameId": "2516474",
+    "boxScore": {
+      "teams": [
+        {
+          "teamId": "672741",
+          "name": "Buccaneers Dark Knights",
+          "periods": [
+            1,
+            1,
+            0
+          ],
+          "total": 2,
+          "sog": "32 (10-8-14)",
+          "pp": "0/3",
+          "pim": 8,
+          "isDarkKnights": true
+        },
+        {
+          "teamId": "672718",
+          "name": "Stars Puckers Div 2",
+          "periods": [
+            0,
+            1,
+            1
+          ],
+          "total": 2,
+          "sog": "23 (6-12-5)",
+          "pp": "0/4",
+          "pim": 6,
+          "isDarkKnights": false
+        }
+      ]
+    },
+    "dkGoals": [
+      {
+        "period": "1st",
+        "time": "11:20",
+        "scorer": "Aaron Moeller",
+        "assists": [
+          "Andrew Litten",
+          "Dayle Leahy"
+        ],
+        "badges": [],
+        "scoreAtTime": "Buc 1, Sta 0"
+      },
+      {
+        "period": "2nd",
+        "time": "10:07",
+        "scorer": "Aidan Atkins",
+        "assists": [
+          "Aaron Moeller"
+        ],
+        "badges": [
+          "SHG"
+        ],
+        "scoreAtTime": "Buc 2, Sta 0"
+      }
+    ]
   }
 }
