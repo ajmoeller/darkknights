@@ -653,6 +653,13 @@
     margin-top: 2px;
   }
 
+  .goal-note {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
   .goal-placeholder {
     font-size: 0.82rem;
     color: var(--text-dim);
@@ -3034,7 +3041,8 @@ const games = [
           "Dayle Leahy"
         ],
         badges: [],
-        scoreAtTime: "Buc 1, Sta 0"
+        scoreAtTime: "Buc 1, Sta 0",
+        note: "Nothin' Special"
       },
       {
         period: "2nd",
@@ -3392,6 +3400,7 @@ function buildGoalLineHtml(g, goal) {
     scoreHtml = `<span class="goal-score"><img src="${jerseySrc}" alt="${jerseyAlt}" class="score-jersey"> ${dkDisplay} <span class="score-sep">•</span> ${oppLabel}</span>`;
   }
   const assistStr = assistPhraseWithTotals(goal.assists, goal._assistTotals);
+  const noteHtml = goal.note ? `<div class="goal-note">${goal.note}</div>` : '';
   const metaEnd = `${badges}${scoreHtml}`;
   const metaEndHtml = metaEnd
     ? `<span class="goal-meta-end">${metaEnd}</span>`
@@ -3403,6 +3412,7 @@ function buildGoalLineHtml(g, goal) {
     <div class="goal-meta"><span class="goal-time">${goal.time}</span>${metaEndHtml}</div>
     <div class="goal-scorer">${displayPlayerName(goal.scorer)} <span class="running-total">(${goal._goalTotal})</span></div>
     <div class="goal-assist">${assistStr !== null ? `${goal.assists.length === 1 ? 'Assist:' : 'Assists:'} ${assistStr}` : 'Unassisted'}</div>
+    ${noteHtml}
     ${attachedMomentsHtml}
   </div>`;
 }
