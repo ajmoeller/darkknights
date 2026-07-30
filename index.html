@@ -350,6 +350,7 @@
 
   .tag-home { background: var(--home-tag); color: #a8e8b8; }
   .tag-away { background: var(--away-tag); color: #e8a8a8; }
+  .tag-tba { background: rgba(255,255,255,0.08); color: var(--text-dim); }
 
   .game-venue {
     font-size: 0.75rem;
@@ -3307,6 +3308,19 @@ const games = [
     opp: "Rhinos",
     venue: "Boondall IceWorld",
     vclass: "venue-boondall"
+  },
+  {
+    date: "2026-08-23",
+    dayName: "Sun",
+    dayNum: "23",
+    month: "August",
+    start: "TBA",
+    end: "",
+    ha: "tba",
+    opp: "Semi-final (1st vs 4th)",
+    venue: "TBA",
+    vclass: "",
+    playoff: true
   }
 ];
 
@@ -3331,7 +3345,7 @@ for (let i = 0; i < games.length; i++) {
   } else {
     gamesRemaining++;
     if (games[i].ha === 'home') homeRemaining++;
-    else awayRemaining++;
+    else if (games[i].ha === 'away') awayRemaining++;
     
     if (games[i].vclass === 'venue-boondall') boondallRemaining++;
     else if (games[i].vclass === 'venue-acacia') acaciaRemaining++;
@@ -4298,7 +4312,7 @@ games.forEach((g, i) => {
   let timeOrScoreHtml = `
     <div class="game-time">
       <div class="time-start">${g.start}</div>
-      <div class="time-end">– ${g.end}</div>
+      ${g.end ? `<div class="time-end">– ${g.end}</div>` : ''}
     </div>
   `;
 
@@ -4319,6 +4333,15 @@ games.forEach((g, i) => {
       </div>
     `;
   }
+
+  const oppLabel = g.playoff ? g.opp : `vs ${g.opp}`;
+  const haTagClass = g.ha === 'home' ? 'tag-home' : (g.ha === 'away' ? 'tag-away' : 'tag-tba');
+  const venueHtml = g.vclass
+    ? `<span class="game-venue ${g.vclass}"><span class="venue-dot"></span>${g.venue}</span>`
+    : `<span class="game-venue">${g.venue}</span>`;
+  const jerseyHtml = isNext && (g.ha === 'home' || g.ha === 'away')
+    ? `<img src="assets/${g.ha === 'home' ? 'darkjersey' : 'whitejersey'}.png" style="width:20px;height:20px;vertical-align:middle;margin-left:6px;border-radius:3px;" alt="${g.ha} jersey logo">`
+    : '';
 
   const toggleHint = g.score ? buildGameToggleHint(g) : '';
 
@@ -4359,10 +4382,10 @@ games.forEach((g, i) => {
       <div class="day-name">${g.dayName}</div>
     </div>
     <div class="game-info">
-      <div class="game-opponent">vs ${g.opp}</div>
+      <div class="game-opponent">${oppLabel}</div>
       <div class="game-meta">
-        <span class="tag ${g.ha === 'home' ? 'tag-home' : 'tag-away'}">${g.ha}</span>
-        <span class="game-venue ${g.vclass}"><span class="venue-dot"></span>${g.venue}</span>
+        <span class="tag ${haTagClass}">${g.ha}</span>
+        ${venueHtml}
       </div>
       ${g.note ? `<div class="game-note">${g.note}</div>` : ''}
     </div>
@@ -4383,11 +4406,11 @@ games.forEach((g, i) => {
       <div class="day-name">${g.dayName}</div>
     </div>
     <div class="game-info">
-      <div class="game-opponent">vs ${g.opp}</div>
+      <div class="game-opponent">${oppLabel}</div>
       <div class="game-meta">
-        <span class="tag ${g.ha === 'home' ? 'tag-home' : 'tag-away'}">${g.ha}</span>
-        ${isNext ? `<img src="assets/${g.ha === 'home' ? 'darkjersey' : 'whitejersey'}.png" style="width:20px;height:20px;vertical-align:middle;margin-left:6px;border-radius:3px;" alt="${g.ha} jersey logo">` : ''}
-        <span class="game-venue ${g.vclass}"><span class="venue-dot"></span>${g.venue}</span>
+        <span class="tag ${haTagClass}">${g.ha}</span>
+        ${jerseyHtml}
+        ${venueHtml}
       </div>
       ${g.note ? `<div class="game-note">${g.note}</div>` : ''}
     </div>
