@@ -1139,6 +1139,7 @@
   .result-win { background: var(--home-tag); color: #a8e8b8; }
   .result-loss { background: var(--away-tag); color: #e8a8a8; }
   .result-tie { background: #4a4a4a; color: #e8e8e8; }
+  .result-postponed { background: #5a4a2a; color: #f0d090; }
 
   .score-numbers {
     font-family: 'Oswald', sans-serif;
@@ -3295,7 +3296,12 @@ const games = [
     opp: "Drop Bears",
     venue: "Boondall IceWorld",
     vclass: "venue-boondall",
-    note: "Rescheduled from Aug 2, 6:00 PM"
+    postponed: true,
+    note: "Postponed due to ice damage — reschedule TBA (was moved from Aug 2)",
+    photoCredit: false,
+    gallery: [
+      "assets/photos/drop-bears-aug9-ice.jpg"
+    ]
   },
   {
     date: "2026-08-16",
@@ -3352,7 +3358,7 @@ for (let i = 0; i < games.length; i++) {
   }
 
   const gd = new Date(games[i].date + 'T00:00:00');
-  if (gd >= today && !games[i].score && nextGameIdx === -1) { 
+  if (gd >= today && !games[i].score && !games[i].postponed && nextGameIdx === -1) { 
     nextGameIdx = i; 
   }
 }
@@ -3569,7 +3575,8 @@ function gameMomentsTagHtml(g) {
 
 function buildGameToggleHint(g) {
   const momentsTag = gameMomentsTagHtml(g);
-  return `<div class="game-toggle-hint"><span class="game-toggle-label"><span>Goals</span>${momentsTag}</span><span class="chevron" aria-hidden="true">▼</span></div>`;
+  const label = (g.postponed && !g.score) ? 'Details' : 'Goals';
+  return `<div class="game-toggle-hint"><span class="game-toggle-label"><span>${label}</span>${momentsTag}</span><span class="chevron" aria-hidden="true">▼</span></div>`;
 }
 
 function goalEventKey(period, time) {
@@ -3656,7 +3663,7 @@ function gameHasPhotos(g) {
 }
 
 function buildPhotoCreditHtml(g) {
-  if (!gameHasPhotos(g)) return '';
+  if (g.photoCredit === false || !gameHasPhotos(g)) return '';
   return `<p class="photo-credit">Photos by <a href="${PHOTO_SOURCE_URL}" target="_blank" rel="noopener noreferrer">${PHOTO_SOURCE_NAME}</a></p>`;
 }
 function clipPosterSrc(src) {
@@ -3788,6 +3795,15 @@ function buildGoalsPanel(g) {
   const hasGallery = g.gallery && g.gallery.length > 0;
   if (!hasGoals && !hasMoments && !hasGallery) {
     panel.innerHTML = html + '<p class="goal-placeholder">Goal-by-goal scoring for Dark Knights is not listed for this game yet. Check the official BIHL box score on the league site.</p>' + buildPhotoCreditHtml(g);
+    return panel;
+  }
+
+  if (g.postponed && !hasGoals && !hasMoments) {
+    html += '<p class="goal-placeholder">Game postponed due to ice damage at Boondall IceWorld. A new date has not been set yet.</p>';
+    html += buildGalleryHtml(g);
+    html += buildPhotoCreditHtml(g);
+    panel.innerHTML = html;
+    attachGalleryButtons(panel, g);
     return panel;
   }
 
@@ -4298,8 +4314,8 @@ games.forEach((g, i) => {
   }
 
   const gd = new Date(g.date + 'T00:00:00');
-  const isPast = gd < today || g.score;
-  const isNext = i === nextGameIdx && !g.score;
+  const isPast = gd < today || g.score || g.postponed;
+  const isNext = i === nextGameIdx && !g.score && !g.postponed;
 
   const wrap = document.createElement('div');
   wrap.className = 'game-wrap';
@@ -4316,7 +4332,13 @@ games.forEach((g, i) => {
     </div>
   `;
 
-  if (g.score) {
+  if (g.postponed) {
+    timeOrScoreHtml = `
+      <div class="game-score">
+        <div class="score-result result-postponed">Postponed</div>
+      </div>
+    `;
+  } else if (g.score) {
     const isWin = g.score.dk > g.score.opp;
     const isLoss = g.score.dk < g.score.opp;
 
@@ -4343,7 +4365,8 @@ games.forEach((g, i) => {
     ? `<img src="assets/${g.ha === 'home' ? 'darkjersey' : 'whitejersey'}.png" style="width:20px;height:20px;vertical-align:middle;margin-left:6px;border-radius:3px;" alt="${g.ha} jersey logo">`
     : '';
 
-  const toggleHint = g.score ? buildGameToggleHint(g) : '';
+  const canExpand = !!(g.score || (g.postponed && ((g.gallery && g.gallery.length) || (g.customMoments && g.customMoments.length))));
+  const toggleHint = canExpand ? buildGameToggleHint(g) : '';
 
   if (toggleHint) {
     card.classList.add('has-goals-toggle');
@@ -4351,9 +4374,9 @@ games.forEach((g, i) => {
     card.setAttribute('role', 'button');
     card.setAttribute('aria-expanded', 'false');
     const mediaSummary = gameMediaSummary(g, { lowercase: true });
-    const ariaDetail = mediaSummary
-      ? `Show goals, ${mediaSummary}`
-      : 'Show goals';
+    const ariaDetail = g.postponed && !g.score
+      ? (mediaSummary ? `Show details, ${mediaSummary}` : 'Show details')
+      : (mediaSummary ? `Show goals, ${mediaSummary}` : 'Show goals');
     card.setAttribute('aria-label', `${ariaDetail}: ${g.month} ${g.dayNum} vs ${g.opp}`);
     const panel = buildGoalsPanel(g);
     card.setAttribute('aria-controls', panel.id);
