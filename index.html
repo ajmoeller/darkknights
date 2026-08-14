@@ -776,6 +776,7 @@
     max-width: 320px;
     margin-top: 8px;
     transition: max-width 0.2s ease;
+    scroll-margin-top: 16px;
   }
 
   .moment-clip-wrap.expanded {
@@ -4245,24 +4246,44 @@ function highlightSharedMoment(momentId) {
   setTimeout(() => el.classList.remove('moment-highlight'), 1600);
 }
 
+function pinSharedElementToTop(el, offset = 16) {
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+}
+
 function scrollToSharedTarget(date, momentId) {
   const wrap = document.getElementById(`game-${date}`);
   if (!wrap) return false;
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const momentEl = momentId ? document.getElementById(`moment-${momentId}`) : null;
-  const target = momentEl || wrap;
-
-  target.scrollIntoView({
-    behavior: reducedMotion ? 'auto' : 'smooth',
-    block: momentEl ? 'center' : 'start',
-  });
-
-  if (momentEl) {
-    highlightSharedMoment(momentId);
-    expandSharedMomentVideo(momentId);
+  if (!momentEl) {
+    pinSharedElementToTop(wrap, 32);
+    return false;
   }
-  return !!momentEl;
+
+  highlightSharedMoment(momentId);
+  expandSharedMomentVideo(momentId);
+
+  const clipWrap = momentEl.querySelector('.moment-clip-wrap');
+  const target = clipWrap || momentEl;
+  const video = clipWrap?.querySelector('video.moment-clip');
+
+  const pinToTop = () => pinSharedElementToTop(target);
+
+  // Expand first, then pin the (now full-size) video to the top. Re-pin after
+  // layout/metadata so a late-loading clip doesn't push itself below the fold.
+  pinToTop();
+  requestAnimationFrame(() => requestAnimationFrame(pinToTop));
+  setTimeout(pinToTop, 220);
+  setTimeout(pinToTop, 600);
+
+  if (video && video.readyState < 1) {
+    video.addEventListener('loadedmetadata', pinToTop, { once: true });
+    if (video.preload === 'none') video.preload = 'metadata';
+  }
+
+  return true;
 }
 
 function openSharedGalleryPhoto(date, photoId) {
@@ -4494,6 +4515,8 @@ function scrollToNextGame() {
 
 if (getSharedGameDate() || getSharedMomentId() || getSharedPhotoId()) {
   initSharedGameLink();
+  // Hash jumps and late-loading clip dimensions can undo the first pin.
+  window.addEventListener('load', () => initSharedGameLink(), { once: true });
 } else {
   requestAnimationFrame(() => requestAnimationFrame(scrollToNextGame));
 }
