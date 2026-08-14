@@ -4109,6 +4109,25 @@ function enterVideoFullscreen(video) {
   });
 });
 
+function setMomentVideoExpanded(wrap, expanded) {
+  const btn = wrap.querySelector('.moment-expand-btn');
+  wrap.classList.toggle('expanded', expanded);
+  if (!btn) return;
+  btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  const label = `${expanded ? 'Collapse' : 'Expand'} video`;
+  btn.setAttribute('aria-label', label);
+  btn.title = label;
+}
+
+function expandSharedMomentVideo(momentId) {
+  const el = document.getElementById(`moment-${momentId}`);
+  const wrap = el?.querySelector('.moment-clip-wrap');
+  const video = wrap?.querySelector('video.moment-clip');
+  if (!video) return false;
+  setMomentVideoExpanded(wrap, true);
+  return true;
+}
+
 function attachMomentExpandButtons(panel) {
   panel.querySelectorAll('.moment-clip-wrap').forEach((wrap) => {
     const photo = wrap.querySelector('img.moment-photo');
@@ -4145,11 +4164,7 @@ function attachMomentExpandButtons(panel) {
         enterVideoFullscreen(video);
         return;
       }
-      const expanded = wrap.classList.toggle('expanded');
-      btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      const label = `${expanded ? 'Collapse' : 'Expand'} video`;
-      btn.setAttribute('aria-label', label);
-      btn.title = label;
+      setMomentVideoExpanded(wrap, !wrap.classList.contains('expanded'));
     });
   });
 }
@@ -4243,7 +4258,10 @@ function scrollToSharedTarget(date, momentId) {
     block: momentEl ? 'center' : 'start',
   });
 
-  if (momentEl) highlightSharedMoment(momentId);
+  if (momentEl) {
+    highlightSharedMoment(momentId);
+    expandSharedMomentVideo(momentId);
+  }
   return !!momentEl;
 }
 
