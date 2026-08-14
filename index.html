@@ -4265,14 +4265,13 @@ function scrollToSharedTarget(date, momentId) {
   highlightSharedMoment(momentId);
   expandSharedMomentVideo(momentId);
 
-  const clipWrap = momentEl.querySelector('.moment-clip-wrap');
-  const target = clipWrap || momentEl;
-  const video = clipWrap?.querySelector('video.moment-clip');
+  // Attached clips live under the goal line (time, scorer, assists). Standalone
+  // moments have that info on the moment line itself. Pin that header, not the video.
+  const target = momentEl.closest('.goal-line') || momentEl;
+  const video = momentEl.querySelector('video.moment-clip');
 
   const pinToTop = () => pinSharedElementToTop(target);
 
-  // Expand first, then pin the (now full-size) video to the top. Re-pin after
-  // layout/metadata so a late-loading clip doesn't push itself below the fold.
   pinToTop();
   requestAnimationFrame(() => requestAnimationFrame(pinToTop));
   setTimeout(pinToTop, 220);
