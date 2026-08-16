@@ -28,6 +28,7 @@ const KNOWN_DK_GAME_IDS = [
   "2516474",
   "2516479",
   "2516481",
+  "2516484",
 ];
 const PLAYER_ALIASES = {
   "Caleb Perry": "White Chocolate",
